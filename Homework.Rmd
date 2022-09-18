@@ -1,0 +1,122 @@
+---
+title: "Econometrics Homework"
+author: "Giovanni Maffei, Timo Predoehl"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+  html_notebook: default
+---
+
+```{r set_up, message=TRUE, warning=TRUE, include=FALSE, paged.print=FALSE}
+pkgs.installed <- installed.packages()
+pkgs.required <- c("car", "AER", "stargazer", "tictoc", "quantmod", "xts", "readr", "latex2exp", "gridExtra", "summarytools", "qwraps2", "nortest", "moments", "xtable", "sm", "astsa", "tseries", "ggplot2", "ggplotgui", "shiny", "tidyverse")
+pkgs.missing <- pkgs.required[which(!pkgs.required %in% pkgs.installed)]
+lapply(pkgs.missing, install.packages, character.only = TRUE)
+lapply(pkgs.required, require, character.only = TRUE)
+
+rm(list=ls()) # clear all variables from enviroment/workspace
+```
+
+
+\section*{Question 1: Spurious Regressions (2 points)} 
+\begin{itemize}
+	\item \textbf{compulsory} ( a ) [1 Point]
+	\begin{itemize}
+		\item{i} Replicate the analysis leading to Figure 14.1 in Davidson MacKinnon (2005, book) by running 100,000 MC, or simply 10,000 MC if your computer is slow (instead of 1 million), and using T = 6, 12, 60, 120, 240, 360, 480. (i) Compute also for each sample size T the distribution of the $R^2s$ of the MC simulations with either 7 separate histograms, or one unique figure where you report on the y-axis the 5\%, 10\% 25\%, 50\%, 75\%, 90\% and 95\% quantiles of the distributions of the simulated $R^2$, and on the x-axis you have T = 6, 12, 60, 120, 240, 360, 480.
+		
+		\item{ii} Similarly (either with histograms, or with one plot of the quantiles) report the distributions of the estimates t-statistics for the test of the null H0 : $\beta_2$ = 0 and
+		
+		\item{iii} their empirical rejection frequencies (that is the empirical size of the tests),which is exactly the figure 14.1 in Davidson MacKinnon (2005, book).
+	\end{itemize}
+	\item ( b ) [1 Point] Based on the results obtained by answering to point (a) summarize the problems of spurious regressions in econometrics.
+\end{itemize} 
+
+\subsection*{(a)(i) Replication Davidson McKinnon, 2005, fig 14.1}
+
+Define 2 random walk processes $x_t$ and $y_t$ analog to (14.03):
+```{r RW_plot, echo=FALSE, message=FALSE, warning=FALSE, fig.show='hold', out.width='50%'}
+RW <- function(Seed, N, x0, mu, sd) {
+  # Seed = 201; N = 300; x0 = 0; mu = 0; sd = 1
+  set.seed(Seed)
+  z <- rnorm(n=N+1, mean=mu, sd=sd)
+  x <- NULL; x[1] <- 0
+  for (t in 2:(N+1)) x[t] <- x[t-1] + z[t]
+  x <- x[-1]
+  x <- as.data.frame(cbind(t = 1:N, x = x, u = z[-(N+1)]))
+  return(x)
+}
+N=300
+X.RW <- RW(Seed = 102, N = N, x0 = 0, mu = 0, sd = 1)
+Y.RW <- RW(Seed = 201, N = N, x0 = 0, mu = 0, sd = 1)
+rw_Data <- data.frame(cbind(t = X.RW$t, x = X.RW$x, u = X.RW$u, y = Y.RW$x, v = Y.RW$u))
+
+lbl <- TeX('RW: $X_t = X_{t-1} + u_{t}$ / WN: $u_{t} \\sim iidN(0,1)$')
+X.graph <- ggplot(rw_Data) +
+  geom_line(aes(x = t, y = x), color = "blue") +
+  geom_point(aes(x = t, y = x), color = "blue") +
+  geom_line(aes(x = t, y = u), color = "red") +
+  geom_point(aes(x = t, y = u), color = "red") +
+  labs(x = 'time', y = 'x') +
+  ggtitle('White Noise and Random Walk') +
+  geom_hline(yintercept = 0) +
+  annotate("label", x=100, y=-5, label = lbl) +
+  theme_linedraw() +
+  theme(text = element_text(size = 8))
+
+lbl <- TeX('RW: $Y_t = Y_{t-1} + v_{t}$ / WN: $v_{t} \\sim iidN(0,1)$')
+Y.graph <- ggplot(rw_Data) +
+  geom_line(aes(x = t, y = y), color = "blue") +
+  geom_point(aes(x = t, y = y), color = "blue") +
+  geom_line(aes(x = t, y = v), color = "red") +
+  geom_point(aes(x = t, y = v), color = "red") +
+  labs(x = 'time', y = 'y') +
+  ggtitle('White Noise and Random Walk') +
+  geom_hline(yintercept = 0) +
+  annotate("label", x=100, y=-5, label = lbl) +
+  theme_linedraw() +
+  theme(text = element_text(size = 8))
+
+xy.Scatter <- ggplot(rw_Data, aes(x = x, y = y))+
+  geom_point()
+
+uv.Scatter <- ggplot(rw_Data, aes(x = u, y = v))+
+  geom_point()
+
+par(mfrow = c(4,1))
+X.graph
+Y.graph
+xy.Scatter
+uv.Scatter
+
+```
+
+We run a simple linear regression analog to (14.12) in the form of $y_t = \beta_1 + \beta_2 x_t + v_t$ and expect it to yield both $R^2$ as well as $\beta_2$ insignificantly different from 0. The hypotheses $H^1_0: \beta_2 = 0$ and $H^2_0: R^2 = 0$ will be tested by running 50 simple linear regressions on each sample size n ranging from 6 to 480, yielding a total of 100,000 regression outcomes. The 50 runs per sample will be based on individually seeded random walks using the command 'set.seed(1000+n)'. For each regression, the t-test $t = \frac{\beta_2 - 0}{\sigma_{\beta_2}} > 1.96$ indicates a rejection of the hypothesis. The rejection rate (no. of t-test > 1.96 / 50) will then be plotted against n in replication of figure 14.1.
+
+```{r}
+T <- c(6, 12, 60, 120, 240, 360, 480)
+result <- c(t=NULL, R2=NULL, t_val=NULL, t_sig=NULL)
+for (t in T){
+  rejected_r2 <- NULL
+  rejected_t <- NULL
+  for (s in 1:150) {
+    # n = 20; x0 = 0; mu = 0; sd = 1
+    Seed <- t+s+100
+    xt <- RW(Seed = Seed, N = t, x0 = 0, mu = 0, sd = 1)
+    yt <- RW(Seed = 1/Seed, N = t, x0 = 0, mu = 0, sd = 1)
+    su <- summary(lm(yt$x ~ xt$x))
+    result <- rbind(result,c(t, su$r.squared, su$coefficients[2,3], ifelse(su$coefficients[2,3]>1.96,1,0)))
+  }
+}
+colnames(result) <- c("t", "R2", "t_value", "t_sig")
+
+result <- as_tibble(result) %>% 
+  mutate(t = as.factor(t))
+
+graph <- ggplot(result, aes(x = t, y = R2, colour = t)) +
+  geom_boxplot(notch = FALSE) +
+  geom_jitter(size = 1, alpha = 0.5, width = 0.25, colour = 'black') +
+  theme_bw()
+graph
+```
+
