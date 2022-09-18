@@ -33,7 +33,7 @@ rm(list=ls()) # clear all variables from enviroment/workspace
 \subsection*{(a)(i) Replication Davidson McKinnon, 2005, fig 14.1}
 
 Simulate a random walk processes $y_t = y_{t-1} + e_t, y_0 = 0, e_t \sim IID(0, \sigma^2)$ analog to (14.03)
-```{r rw, echo=FALSE, message=FALSE, warning=FALSE}
+```{r rw, echo=FALSE, message=FALSE, warning=FALSE, fig.align = 'center', out.width="50%"}
 # Simulate : White noise, Random Walk
 set.seed(102)
 sigma_ux <- 1 ; 
@@ -138,7 +138,7 @@ independent_AR_simulation<- function(phi_vec, c_vec, sigma_u_vec, T){
     sigma_u <- sigma_u_vec[ind1]
 
     # simulate vector of innovations zero mean, and sd given as input
-    set.seed(100+ind1) # fix "seed" in order to produce same random numbers every time next line of code is called!
+    # set.seed(10000+ind1) # fix "seed" in order to produce same random numbers every time next line of code is called!
     u    <- rnorm(T+1, mean = 0, sd = sigma_u) #WN
     u_sim_mat[,ind1] <- u
 
@@ -205,7 +205,7 @@ acf(
 
 Scatterplot of $u_{x,t}$ and $u_{y,t}$. The error terms, while individually and randomly generated, appear to to correlated, which is confirmed by the regression of $u_{y,t}$ on $u_{x,t}$. The resulting $t_\beta$ is significant.
 
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.align='center', out.width="50%"}
 par(mfrow=c(1,1))
 plot(x = u_sim[,1], y = u_sim[,2], 
      col = "blue", lwd =1, 
@@ -250,7 +250,7 @@ acf(
 ```
 
 Run a regression of two AR(1) processes. 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, out.width="50%", fig.align='center'}
 #################################################
 # scatterplot of y_t vs. x_t
 #################################################
@@ -266,12 +266,105 @@ summary(reg2)
 abline(reg2, col="red", lwd=2) # display regression line on scatterplot (y~x)
 ```
 
-Compare the regression results
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+Compare the regression results using stargazer:
+```{r echo=FALSE, message=FALSE, warning=FALSE, out.width="50%", fig.align='center'}
 stargazer(list(reg1,reg2), type = "text")
 # Magics: you can save tabel directly in latex !!!!!!!!!!!!!!!!!!!
 # stargazer(list(reg1,reg2),
-#           align=TRUE, type = "text", no.space = TRUE, 
-#           title = "Table X", out = "texoutput/fit.tex")
+#           align=TRUE, type = "text", no.space = TRUE,
+#           title = "Table X", out = "fit.tex")
 ```
+
+Now lets do the 1,000,000 simulations of 2 AR(1)s, regress them on each other and store the regression results in a matrix for further analysis.
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# N. of MC simulations
+Nsim <- 2000
+
+# DGP parameters : as above #############
+phi_vec     = c(1, 1)
+c_vec       = c(0,0)
+sigma_u_vec = c(1,1) 
+T           = c(6, 12, 60, 120, 240, 360, 480)
+
+# empty matrix to store intercept, t-stat(intercept), beta, t-stat (beta), and R^2
+MC_mat <- NA*matrix(data = 0, nrow = length(T)*Nsim, ncol = 6)
+colnames(MC_mat) <- c("T", "intercept", "t_intercept", "beta", "t_beta", "R2")
+
+tic()
+  for (t in T) {
+    #t = 6
+    t_idx <- which(t == T)
+    for(sim_idx in seq(1,Nsim)) {
+      # sim_idx = 1
+      output_temp <- independent_AR_simulation(phi_vec, c_vec, sigma_u_vec, t)
+      AR_sim <- output_temp$AR_sim_mat
+      reg_sim  <- lm(AR_sim[,2] ~ AR_sim[,1])
+      mat_idx = (t_idx-1) * Nsim + sim_idx
+      MC_mat[mat_idx, 1] <- t  # T
+      MC_mat[mat_idx, 2] <- summary(reg_sim)$coefficients[,1][1]  # intercept : value
+      MC_mat[mat_idx, 3] <- summary(reg_sim)$coefficients[,3][1]  # intercept : t-stat
+      MC_mat[mat_idx, 4] <- summary(reg_sim)$coefficients[,1][2]  # beta : value
+      MC_mat[mat_idx, 5] <- summary(reg_sim)$coefficients[,3][2]  # beta : t-stat
+      MC_mat[mat_idx, 6] <- summary(reg_sim)$r.squared            # R^2
+    }  
+  }
+toc()
+
+```
+
+Plot histogram of results
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.align='center', out.width="50%"}
+# Histogram of estimated t-statistics for beta vs. N(0,1)
+par(mfrow=c(1,2))
+
+MC_R2 <- MC_mat %>% 
+  as.data.frame() %>% 
+  as_tibble() %>%
+  select(T, R2) %>% 
+  mutate(T = as.factor(T))
+
+graph <- ggplot(MC_R2, aes(x = R2, fill = T)) +
+  geom_density(position = 'identity', alpha = 0.8, adjust = 1) +
+    stat_summary(
+    geom = "vline",
+    orientation = "y",
+    # y is a required aesthetic, so use a dummy value
+    aes(y = 1, xintercept = after_stat(x)),
+    fun = function(x) {
+      quantile(x, probs = c(.05, 0.1, .25, .50, .75, .9, .95))
+    }
+  ) +
+  facet_grid( T ~ . ) +
+  theme_bw() +
+  ggtitle(label = "Distribution of R^2 around the 5,10,25,50,75,90 and 95% quantiles")
+graph
+```
+
+
+The rate of rejection of $H_0:\beta=0$ increases with the sample size T.
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.align='center', out.width="50%"}
+# Empirical size of (asymptotic) t-test
+# normal quantile for 5% two sided test:
+alpha <- 0.05;
+crit_value <- qnorm(1-(alpha/2))
+
+MC_beta_reject <- MC_mat %>% 
+  as.data.frame() %>% 
+  as_tibble() %>%
+  mutate(
+    t_crit = crit_value,
+    reject = ifelse(t_beta > t_crit,1,0)
+    ) %>% 
+  group_by(T) %>% 
+  summarise(pct_reject = sum(reject)/Nsim)
+
+ggplot(MC_beta_reject) +
+  geom_col(aes(x = as.factor(T), y = pct_reject*100)) +
+  ggtitle(label = TeX('% of regressions which reject $H_0: t = \\frac{\\beta - 0}{\\sigma_{\\beta}}>1.96$')) +
+  ylab(label = "%") +
+  xlab(label = "T")
+
+
+```
+
 

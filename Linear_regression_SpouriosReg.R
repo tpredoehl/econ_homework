@@ -335,6 +335,7 @@ Nsim <- 2000
 
 # empty matrix to store intercept, t-stat(intercept), beta, t-stat (beta), and R^2
 MC_mat <- NA*matrix(0,Nsim,5)
+colnames(MC_mat) <- c("intercept", "t_intercept", "beta", "t_beta", "R2")
 
 # DGP parameters : as above #############
 #phi_vec     = c(0.95, 0.95)
@@ -347,7 +348,7 @@ T           = 100
 #########################################
 tic()
 for(ind_sim in seq(1,Nsim)){
-  
+  # ind_sim = 1
   output_temp <- independent_AR_simulation(phi_vec, c_vec, sigma_u_vec, T)
   AR_sim <- output_temp$AR_sim_mat
   
