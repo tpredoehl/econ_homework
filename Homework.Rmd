@@ -1,5 +1,5 @@
 ---
-title: "Econometrics Homework"
+title: "EDHEC PhD Finance 2022 - Econometrics Homework"
 author: "Giovanni Maffei, Timo Predoehl"
 output:
   pdf_document: default
@@ -34,6 +34,221 @@ rm(list=ls()) # clear all variables from enviroment/workspace
 
 \subsection*{(a)(i) Replication Davidson McKinnon, 2005, fig 14.1}
 
+Simulate a random walk processes $y_t = y_{t−1} + e_t, y_0 = 0, e_t \sim IID(0, \sigma^2)$ analog to (14.03)
+```{r rw}
+# Simulate : White noise, Random Walk
+set.seed(102)
+sigma_ux <- 1 ; 
+T <- 300      # T = sample size (length of TS to simulate)
+# Simulate white Noise: u_{xt} ~ iidN(0,1), for t = 1, ..., T   
+u = rnorm(T+1, mean = 0, sd = sigma_ux);  
+# Loop to simulate observations of Random Walk : X_t = X_{t-1} + u_{xt} , 
+X.RW      <- NA*matrix(0,T+1,1) # empty vector ( T X 1 )
+X.RW[1]   <- 0 # initial value of RW set arbitrarily = 0 (unconditional mean)
+
+# 'for' loop to generate all observations of RW form 2 to T
+for (t in 2:(T+1)){ X.RW[t] <- X.RW[t-1] + u[t] }
+X.RW <- X.RW[-1,] # delete initial observation which was set to 0    
+
+# plot simulated RW (X_t) and its innovations (u_xt)
+# dev.off()
+plot(X.RW, type='o', pch=19, col="blue", main=TeX('White Noise and Random Walk'), xlab='time', ylab='', cex = 0.5)
+abline(0,0)
+lines(u, type='o', pch=19, col="red", cex = 0.5)
+legend("bottomleft", legend=c(TeX('RW: $X_t = X_{t-1} + u_{x,t}$   '), TeX('WN: $u_{x,t} \\sim iidN(0,1)$   ')), 
+       pch=c(19,19), col=c("blue", "red"));
+
+```
+
+Simulate two AR(1) processes according to $x_t = \phi x_{t-1} + u_t$, with $\phi=0.5$ and with $\phi = 1$. The ACFs of two processes indicate that in latter significant autocorrelation persists at least up to $x_{t-20}$, while the former autocorrelation becomes insignificant after 3 lags.
+
+```{r ar}
+# Simulate AR(1) and plot acf
+set.seed(102)
+sigma_ux <- 1 ; 
+T<- 200
+u    <- rnorm(T+1, mean = 0, sd = sigma_ux) #WN
+phi  <- 0.5                                 # AR 1 coefficient 
+
+X.AR1.stat    <- NA*matrix(0,T,1) # empty vector ( T X 1 )
+X.AR1.nonstat <- NA*matrix(0,T,1) # empty vector ( T X 1 )
+
+X.AR1.nonstat[1] <- 0 # both processes start at t= 0 from the value 0
+X.AR1.stat[1]    <- 0  
+for (t in 2:T){
+  X.AR1.nonstat[t] <- X.AR1.nonstat[t-1] + u[t];
+  X.AR1.stat[t]    <- phi*X.AR1.stat[t-1] + u[t] 
+}
+
+y.range <-range(as.matrix(c(X.AR1.stat,X.AR1.nonstat)),na.rm = TRUE, finite = FALSE) 
+
+#dev.off()
+par(mfrow=c(2,2)) # 4 whiten noises
+plot(X.AR1.nonstat, type='o', pch=19, col="blue", main=TeX('AR(1): $X_t = X_{t-1} + u_{x,t},  u_{x,t} \\sim iidN(0,1)$'), xlab='time', ylab='', cex = 0.5)
+abline(0,0)
+plot(X.AR1.stat, type='o', pch=19, col="red", main=TeX('AR(1): $X_t = 0.5 X_{t-1} + u_{x,t},  u_{x,t} \\sim iidN(0,1)$'), xlab='time', ylab='', cex = 0.5)
+
+# plot Autocorrelation function (acf)
+lag.max.acf = 20;
+acf(X.AR1.nonstat, main=TeX('ACF, AR(1) NON-stationary'), lag.max = lag.max.acf, xlab = "lag ") #, xlim = c(1,40)
+acf(X.AR1.stat, main=TeX('ACF, AR(1) stationary'), lag.max = lag.max.acf, xlab = "lag ") # xlim = c(1,40)
+```
+
+```{r}
+###############################################
+# Simulate two independent RW and run spurious regression
+
+# function to simulate K independent AR process with :
+# T       = n.f simulated dates (simulated sample size)
+# phi_vec = [\phi_1, ..., phi_N]' = autoregressive coefficients for each AR process
+# c_vec   = [c_1, ..., c_N] = constant in AR process
+independent_AR_simulation<- function(phi_vec, c_vec, sigma_u_vec, T){
+
+  N <- length(phi_vec) ; # number of AR(1) processes to simulate
+  
+  # create empty matrix T X N that will contain all simulated AR processes
+  
+  AR_sim_mat <- NA*matrix(0,T+1,N) # empty vector ( (T+1) X 1 )
+   u_sim_mat <- NA*matrix(0,T+1,N) # empty vector ( (T+1) X 1 )
+  
+  # loop for different AR processes
+  for (ind1 in seq(1,N)) {
+    #########################
+    # loop for different dates for one AR process
+
+    c       <-       c_vec[ind1]
+    phi     <-     phi_vec[ind1]
+    sigma_u <- sigma_u_vec[ind1]
+
+    # simulate vector of innovations zero mean, and sd given as input
+#    set.seed(100+ind1) # fix "seed" in order to produce same random numbers every time next line of code is called!
+    u    <- rnorm(T+1, mean = 0, sd = sigma_u) #WN
+    u_sim_mat[,ind1] <- u
+
+    # generate starting observation for the process: unconditional mean (stationary processes) or 0 (for non-stat processes only!)
+    if (abs(phi)<1){
+    AR_sim_mat[1,ind1] <- c/(1-phi) ; #start from unconditional value of the process
+    } else{
+    AR_sim_mat[1,ind1] <- 0 ; #start from unconditional value of the process
+    }
+
+    # simulate all other observations t=2 to T+1
+    #######################
+    for (t in seq(2,T+1)) {
+      AR_sim_mat[t,ind1] <- phi*AR_sim_mat[t-1,ind1] + u[t];
+      # print(c(t,ind1))
+      
+      }# end of t loop
+    ########################
+
+    } # end of ind1 loop
+    #########################
+
+  # Output of function
+  # 1 = simulated AR process
+  # 2 = simulated innovations
+  
+  return(list(AR_sim_mat = AR_sim_mat, u_sim_mat = u_sim_mat))
+  } # end of function
+########################
+  
+# RUN FUNCTION #############################################
+phi_vec     = c(0.95, 0.95) 
+c_vec       = c(0,0)
+sigma_u_vec = c(1,1) 
+T           = 60
+
+
+output_temp <- independent_AR_simulation(phi_vec, c_vec, sigma_u_vec, T)
+str(output_temp)
+
+AR_sim <- output_temp$AR_sim_mat
+u_sim  <- output_temp$u_sim_mat
+########################################################
+# plot simulated innovations of AR(1), that is u_{x,t} and $u_{y,t}
+# dev.off()
+#dev.off()
+par(mfrow=c(2,2)) # 4 pnales for plots
+plot(u_sim[,1], type='o', pch=19, col="blue", main=TeX('AR innovation: $u_{x,t}$'), xlab='time', ylab='', cex = 0.5)
+abline(0,0)
+plot(u_sim[,2], type='o', pch=19, col="red", main=TeX('AR innovation: $u_{y,t}$'), xlab='time', ylab='', cex = 0.5)
+abline(0,0)
+
+# ACFs
+lag.max.acf = 30
+acf(u_sim[,1], main=TeX('ACF, AR: $x_t = \\phi_1 x_{t-1} + u_{x,t}$'), lag.max = lag.max.acf, xlab = "lag ") #, xlim = c(1,40)
+acf(u_sim[,2], main=TeX('ACF, AR: $y_t = \\phi_2 y_{t-1} + u_{y,t}$'), lag.max = lag.max.acf, xlab = "lag ") # xlim = c(1,40)
+
+# scatterplot + regression line
+# dev.off()
+par(mfrow=c(1,1)) # 4 panels for plots
+
+#################################################
+# scatterplot of u_yt vs. u_xt
+#################################################
+par(mfrow=c(1,1))
+plot(x = u_sim[,1], y = u_sim[,2], 
+     col = "blue", lwd =1, 
+     xlab=TeX("$u_{x,t}$"), ylab=TeX("$u_{y,t}$"),
+     main=TeX('$u_{y,t}$ vs. $u_{x,t}$'),   )
+
+#dev.off()
+reg1  <- lm(u_sim[,2] ~ u_sim[,1])
+#res <-resid(reg1) ; 
+# summary(reg1)
+
+#stargazer(list(reg1,reg2,reg3f),type="text")
+stargazer(list(reg1),type="text")
+summary(reg1)
+abline(reg1, col="red", lwd=2) # display regression line on scatterplot (y~x)
+########################################################
+# plot simulated AR(1)
+# dev.off()
+#dev.off()
+par(mfrow=c(2,2)) # 4 whiten noises
+plot(AR_sim[,1], type='o', pch=19, col="blue", main=TeX('AR: $x_t = \\phi_1 x_{t-1} + u_{x,t}$'), xlab='time', ylab='', cex = 0.5)
+abline(0,0)
+plot(AR_sim[,2], type='o', pch=19, col="red", main=TeX('AR: $y_t = \\phi_2 y_{t-1} + u_{y,t}$'), xlab='time', ylab='', cex = 0.5)
+abline(0,0)
+
+
+# legend("bottomleft", legend=c(TeX('AR: $x_t = 0.5 x_{t-1} + u_{x,t}$'), TeX('AR: $y_t = 0.95 y_{t-1} + u_{y,t}$')), 
+#        pch=c(19,19), col=c("blue", "red"));
+lag.max.acf = 30
+acf(AR_sim[,1], main=TeX('ACF, AR: $x_t = \\phi_1 x_{t-1} + u_{x,t}$'), lag.max = lag.max.acf, xlab = "lag ") #, xlim = c(1,40)
+acf(AR_sim[,2], main=TeX('ACF, AR: $y_t = \\phi_2 y_{t-1} + u_{y,t}$'), lag.max = lag.max.acf, xlab = "lag ") # xlim = c(1,40)
+#################################################
+# scatterplot of y_t vs. x_t
+#################################################
+par(mfrow=c(1,1))
+plot(x = AR_sim[,1], y = AR_sim[,2], 
+     col = "blue", lwd =1, 
+     xlab=TeX("$x_{t}$"), ylab=TeX("$y_{t}$"),
+     main=TeX('$y_{t}$ vs. $x_{t}$'),   )
+
+#dev.off()
+#############################################################
+# Run Spurious regression ###################################
+#############################################################
+reg2  <- lm(AR_sim[,2] ~ AR_sim[,1])
+#res <-resid(reg1) ; 
+# summary(reg1)
+
+#stargazer(list(reg1,reg2,reg3f),type="text")
+stargazer(list(reg2),type="text")
+summary(reg2)
+abline(reg2, col="red", lwd=2) # display regression line on scatterplot (y~x)
+
+stargazer(list(reg1,reg2), type = "text")
+# Magics: you can save tabel directly in latex !!!!!!!!!!!!!!!!!!!
+# stargazer(list(reg1,reg2),
+#           align=TRUE, type = "text", no.space = TRUE, 
+#           title = "Table X", out = "texoutput/fit.tex")
+```
+
+
+
+################################################################################
 Define 2 random walk processes $x_t$ and $y_t$ analog to (14.03):
 ```{r RW_plot, echo=FALSE, message=FALSE, warning=FALSE, fig.show='hold', out.width='50%'}
 RW <- function(Seed, N, x0, mu, sd) {
