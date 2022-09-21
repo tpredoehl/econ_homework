@@ -16,105 +16,6 @@ lapply(pkgs.missing, install.packages, character.only = TRUE)
 lapply(pkgs.required, require, character.only = TRUE)
 
 rm(list=ls()) # clear all variables from enviroment/workspace
-```
-
-
-\section*{Question 1: Spurious Regressions (2 points)} 
-\begin{itemize}
-	\item \textbf{compulsory} ( a ) [1 Point]
-	\begin{itemize}
-		\item{i} Replicate the analysis leading to Figure 14.1 in Davidson MacKinnon (2005, book) by running 100,000 MC, or simply 10,000 MC if your computer is slow (instead of 1 million), and using $T = 6, 12, 60, 120, 240, 360, 480$. (i) Compute also for each sample size T the distribution of the $R^2s$ of the MC simulations with either 7 separate histograms, or one unique figure where you report on the $y-axis$ the 5\%, 10\% 25\%, 50\%, 75\%, 90\% and 95\% quantiles of the distributions of the simulated $R^2$, and on the $x-axis$ you have T = 6, 12, 60, 120, 240, 360, 480.
-		\item{ii} Similarly (either with histograms, or with one plot of the quantiles) report the distributions of the estimates t-statistics for the test of the null H0 : $\beta_2$ = 0 and
-		\item{iii} their empirical rejection frequencies (that is the empirical size of the tests),which is exactly the figure 14.1 in Davidson MacKinnon (2005, book).
-	\end{itemize}
-	\item ( b ) [1 Point] Based on the results obtained by answering to point (a) summarize the problems of spurious regressions in econometrics.
-\end{itemize} 
-
-\subsection*{(a)(i) Replication Davidson McKinnon, 2005, fig 14.1}
-
-Simulate a random walk processes $y_t = y_{t-1} + e_t, y_0 = 0, e_t \sim IID(0, \sigma^2)$ analog to (14.03)
-```{r rw, echo=FALSE, message=FALSE, warning=FALSE, fig.align = 'center', out.width="50%"}
-# Simulate : White noise, Random Walk
-set.seed(102)
-sigma_ux <- 1 ; 
-T <- 300      # T = sample size (length of TS to simulate)
-# Simulate white Noise: u_{xt} ~ iidN(0,1), for t = 1, ..., T   
-u = rnorm(T+1, mean = 0, sd = sigma_ux);  
-# Loop to simulate observations of Random Walk : X_t = X_{t-1} + u_{xt} , 
-X.RW      <- NA*matrix(0,T+1,1) # empty vector ( T X 1 )
-X.RW[1]   <- 0 # initial value of RW set arbitrarily = 0 (unconditional mean)
-
-# 'for' loop to generate all observations of RW form 2 to T
-for (t in 2:(T+1)){ X.RW[t] <- X.RW[t-1] + u[t] }
-X.RW <- X.RW[-1,] # delete initial observation which was set to 0    
-
-# plot simulated RW (X_t) and its innovations (u_xt)
-# dev.off()
-plot(
-  X.RW, type='o', 
-  pch=19, col="blue", cex = 0.5,
-  main=TeX('White Noise and Random Walk'), 
-  xlab='time', ylab='')
-abline(0,0)
-lines(u, type='o', pch=19, col="red", cex = 0.5)
-legend(
-  "bottomleft", pch=c(19,19), col=c("blue", "red"),
-  legend=c(TeX('RW: $X_t = X_{t-1} + u_{x,t}$   '), TeX('WN: $u_{x,t} \\sim iidN(0,1)$   ')))
-
-```
-
-Simulate two AR(1) processes according to $x_t = \phi x_{t-1} + u_t$, with $\phi=0.5$ and with $\phi = 1$. The ACFs of two processes indicate that in latter significant autocorrelation persists at least up to 20 lags, while the former autocorrelation becomes insignificant after 3 lags. Hence, in the case of AR(1), autocorrelation is a function of the parameter $\phi$.
-
-```{r ar, echo=FALSE, message=FALSE, warning=FALSE}
-# Simulate AR(1) and plot acf
-set.seed(102)
-sigma_ux <- 1 ; 
-T<- 200
-u    <- rnorm(T+1, mean = 0, sd = sigma_ux) #WN
-phi  <- 0.5                                 # AR 1 coefficient 
-
-X.AR1.stat    <- NA*matrix(0,T,1) # empty vector ( T X 1 )
-X.AR1.nonstat <- NA*matrix(0,T,1) # empty vector ( T X 1 )
-
-X.AR1.nonstat[1] <- 0 # both processes start at t= 0 from the value 0
-X.AR1.stat[1]    <- 0  
-for (t in 2:T){
-  X.AR1.nonstat[t] <- X.AR1.nonstat[t-1] + u[t];
-  X.AR1.stat[t]    <- phi*X.AR1.stat[t-1] + u[t] 
-}
-
-y.range <-range(as.matrix(c(X.AR1.stat,X.AR1.nonstat)),na.rm = TRUE, finite = FALSE) 
-
-par(mfrow=c(2,2))
-
-plot(
-  X.AR1.nonstat, 
-  type='o', pch=19, col="blue", cex = 0.5,
-  main=TeX('AR(1): $X_t = X_{t-1} + u_{x,t},  u_{x,t} \\sim iidN(0,1)$'), 
-  xlab='time', ylab='')
-abline(0,0)
-
-plot(
-  X.AR1.stat, 
-  type='o', pch=19, col="red", cex = 0.5,
-  main=TeX('AR(1): $X_t = 0.5 X_{t-1} + u_{x,t},  u_{x,t} \\sim iidN(0,1)$'), 
-  xlab='time', ylab='')
-
-# plot Autocorrelation function (acf)
-lag.max.acf = 20;
-acf(
-  X.AR1.nonstat, 
-  main=TeX('ACF, AR(1) NON-stationary'), 
-  lag.max = lag.max.acf, xlab = "lag ")
-
-acf(
-  X.AR1.stat, 
-  main=TeX('ACF, AR(1) stationary'), 
-  lag.max = lag.max.acf, xlab = "lag ")
-```
-
-Define a function to produces N AR(1) simulations. 
-```{r ar_function, echo=FALSE, message=FALSE, warning=FALSE}
 
 independent_AR_simulation<- function(phi_vec, c_vec, sigma_u_vec, T){
   # Simulate two independent RW and run spurious regression
@@ -159,126 +60,19 @@ independent_AR_simulation<- function(phi_vec, c_vec, sigma_u_vec, T){
   # 2 = simulated innovations
   return(list(AR_sim_mat = AR_sim_mat, u_sim_mat = u_sim_mat))
 }
-
-phi_vec     = c(0.95, 0.95) 
-c_vec       = c(0,0)
-sigma_u_vec = c(1,1) 
-T           = 60
-
-output_temp <- independent_AR_simulation(phi_vec, c_vec, sigma_u_vec, T)
-AR_sim <- output_temp$AR_sim_mat
-u_sim  <- output_temp$u_sim_mat
 ```
 
-Plot the simulated error terms of the two AR(1)s, that is $u_{x,t}$ and $u_{y,t}$. The respective ACFs indicate that the error terms are not autocorrelated.
+\section*{Question 1: Spurious Regressions (2 points)} 
 
-```{r acf_u_v, echo=FALSE, message=FALSE, warning=FALSE}
-par(mfrow=c(2,2))
+\subsection*{1.a. [1 Point] Replicate the analysis leading to Figure 14.1 in Davidson MacKinnon (2005, book)}
+\subsection*{1.a. (i) Compute also for each sample size T the distribution of the R2s of the MC simulations with either 7 separate histograms, or one unique figure where you report on the y-axis the 5%, 10% 25%, 50%, 75%, 90% and 95% quantiles of the distributions of the simulated R2, and on the x-axis you have T = 6, 12, 60, 120, 240, 360, 480}
+\subsection*{(ii) Similarly (either with histograms, or with one plot of the quantiles) report the distributions of the estimates t-statistics for the test of the null H0 : β2 = 0}
+\subsection*{(iii) their empirical rejection frequencies (that is the empirical size of the tests), which is exactly the figure 14.1 in Davidson MacKinnon (2005, book).}
+\subsection*{1.b [1 Point] Based on the results obtained by answering to point (a) summarize the problems of spurious regressions in econometrics.}
 
-plot(
-  u_sim[,1], 
-  type='o', pch=19, col="blue", cex = 0.5,
-  main=TeX('AR innovation: $u_{x,t}$'), 
-  xlab='time', ylab='')
-abline(0,0)
-
-plot(
-  u_sim[,2], 
-  type='o', pch=19, col="red", cex = 0.5,
-  main=TeX('AR innovation: $u_{y,t}$'), 
-  xlab='time', ylab='')
-abline(0,0)
-
-# ACFs
-lag.max.acf = 30
-
-acf(
-  u_sim[,1], 
-  main=TeX('ACF, AR: $x_t = \\phi_1 x_{t-1} + u_{x,t}$'), 
-  lag.max = lag.max.acf, xlab = "lag ")
-
-acf(
-  u_sim[,2], 
-  main=TeX('ACF, AR: $y_t = \\phi_2 y_{t-1} + u_{y,t}$'), 
-  lag.max = lag.max.acf, xlab = "lag ")
-```
-
-Scatterplot of $u_{x,t}$ and $u_{y,t}$. The error terms, while individually and randomly generated, appear to to correlated, which is confirmed by the regression of $u_{y,t}$ on $u_{x,t}$. The resulting $t_\beta$ is significant.
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, fig.align='center', out.width="50%"}
-par(mfrow=c(1,1))
-plot(x = u_sim[,1], y = u_sim[,2], 
-     col = "blue", lwd =1, 
-     xlab=TeX("$u_{x,t}$"), ylab=TeX("$u_{y,t}$"),
-     main=TeX('$u_{y,t}$ vs. $u_{x,t}$'))
-reg1  <- lm(u_sim[,2] ~ u_sim[,1])
-stargazer(list(reg1),type="text")
-summary(reg1)
-abline(reg1, col="red", lwd=2)
-```
-
-Compare ACF of the two AR processes. Autocorrelation is present and takes a fading wave pattern with significance at the initial 5-10 lags and then again around 15 lags.
-
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-par(mfrow=c(2,2))
-
-plot(
-  AR_sim[,1], 
-  type='o', pch=19, col="blue", cex = 0.5,
-  main=TeX('AR: $x_t = \\phi_1 x_{t-1} + u_{x,t}$'), 
-  xlab='time', ylab='')
-abline(0,0)
-
-plot(
-  AR_sim[,2], 
-  type='o', pch=19, col="red", cex = 0.5,
-  main=TeX('AR: $y_t = \\phi_2 y_{t-1} + u_{y,t}$'), 
-  xlab='time', ylab='')
-abline(0,0)
-
-lag.max.acf = 30
-acf(
-  AR_sim[,1], 
-  main=TeX('ACF, AR: $x_t = \\phi_1 x_{t-1} + u_{x,t}$'), 
-  lag.max = lag.max.acf, xlab = "lag ")
-
-acf(
-  AR_sim[,2], 
-  main=TeX('ACF, AR: $y_t = \\phi_2 y_{t-1} + u_{y,t}$'), 
-  lag.max = lag.max.acf, xlab = "lag ")
-
-```
-
-Run a regression of two AR(1) processes. 
-```{r echo=FALSE, message=FALSE, warning=FALSE, out.width="50%", fig.align='center'}
-#################################################
-# scatterplot of y_t vs. x_t
-#################################################
-par(mfrow=c(1,1))
-plot(x = AR_sim[,1], y = AR_sim[,2], 
-     col = "blue", lwd =1, 
-     xlab=TeX("$x_{t}$"), ylab=TeX("$y_{t}$"),
-     main=TeX('$y_{t}$ vs. $x_{t}$'),   )
-
-reg2  <- lm(AR_sim[,2] ~ AR_sim[,1])
-stargazer(list(reg2),type="text")
-summary(reg2)
-abline(reg2, col="red", lwd=2) # display regression line on scatterplot (y~x)
-```
-
-Compare the regression results using stargazer:
-```{r echo=FALSE, message=FALSE, warning=FALSE, out.width="50%", fig.align='center'}
-stargazer(list(reg1,reg2), type = "text")
-# Magics: you can save tabel directly in latex !!!!!!!!!!!!!!!!!!!
-# stargazer(list(reg1,reg2),
-#           align=TRUE, type = "text", no.space = TRUE,
-#           title = "Table X", out = "fit.tex")
-```
-
-Now lets do the 1,000,000 simulations of 2 AR(1)s, regress them on each other and store the regression results in a matrix for further analysis.
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 # N. of MC simulations
-Nsim <- 2000
+Nsim <- 200
 
 # DGP parameters : as above #############
 phi_vec     = c(1, 1)
@@ -310,20 +104,14 @@ tic()
   }
 toc()
 
-```
-
-Plot histogram of results
-```{r echo=FALSE, message=FALSE, warning=FALSE, fig.align='center', out.width="50%"}
 # Histogram of estimated t-statistics for beta vs. N(0,1)
-par(mfrow=c(1,2))
-
 MC_R2 <- MC_mat %>% 
   as.data.frame() %>% 
   as_tibble() %>%
   select(T, R2) %>% 
   mutate(T = as.factor(T))
 
-graph <- ggplot(MC_R2, aes(x = R2, fill = T)) +
+graph1 <- ggplot(MC_R2, aes(x = R2, fill = T)) +
   geom_density(position = 'identity', alpha = 0.8, adjust = 1) +
     stat_summary(
     geom = "vline",
@@ -336,13 +124,9 @@ graph <- ggplot(MC_R2, aes(x = R2, fill = T)) +
   ) +
   facet_grid( T ~ . ) +
   theme_bw() +
-  ggtitle(label = "Distribution of R^2 around the 5,10,25,50,75,90 and 95% quantiles")
-graph
-```
+  ggtitle(label = TeX("Distribution of $R^2$ around the 5,10,25,50,75,90 and 95% quantiles"))
 
 
-The rate of rejection of $H_0:\beta=0$ increases with the sample size T.
-```{r echo=FALSE, message=FALSE, warning=FALSE, fig.align='center', out.width="50%"}
 # Empirical size of (asymptotic) t-test
 # normal quantile for 5% two sided test:
 alpha <- 0.05;
@@ -358,13 +142,25 @@ MC_beta_reject <- MC_mat %>%
   group_by(T) %>% 
   summarise(pct_reject = sum(reject)/Nsim)
 
-ggplot(MC_beta_reject) +
+graph2 <- ggplot(MC_beta_reject) +
   geom_col(aes(x = as.factor(T), y = pct_reject*100)) +
-  ggtitle(label = TeX('% of regressions which reject $H_0: t = \\frac{\\beta - 0}{\\sigma_{\\beta}}>1.96$')) +
+  ggtitle(label = TeX('% of regressions which reject $H_0: \\beta = 0$ with $t = \\frac{\\beta - 0}{\\sigma_{\\beta}}>1.96$')) +
   ylab(label = "%") +
   xlab(label = "T")
 
 
+graph3 <- ggplot(MC_beta_reject, aes(x = T, y = pct_reject)) +
+  geom_line() +
+  theme_bw()
+
+
+par(mfrow=c(1,2))
+graph1
+graph2
+graph3
+
 ```
+
+
 
 

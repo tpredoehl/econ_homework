@@ -1,0 +1,213 @@
+---
+title: "Annex to Econ homework"
+output: html_notebook
+---
+
+Run required function from main book first.
+
+Annex
+
+Simulate a random walk processes $y_t = y_{t-1} + e_t, y_0 = 0, e_t \sim IID(0, \sigma^2)$ analog to (14.03)
+```{r rw, echo=FALSE, message=FALSE, warning=FALSE, fig.align = 'center', out.width="50%"}
+# Simulate : White noise, Random Walk
+set.seed(102)
+sigma_ux <- 1 ; 
+T <- 300      # T = sample size (length of TS to simulate)
+# Simulate white Noise: u_{xt} ~ iidN(0,1), for t = 1, ..., T   
+u = rnorm(T+1, mean = 0, sd = sigma_ux);  
+# Loop to simulate observations of Random Walk : X_t = X_{t-1} + u_{xt} , 
+X.RW      <- NA*matrix(0,T+1,1) # empty vector ( T X 1 )
+X.RW[1]   <- 0 # initial value of RW set arbitrarily = 0 (unconditional mean)
+
+# 'for' loop to generate all observations of RW form 2 to T
+for (t in 2:(T+1)){ X.RW[t] <- X.RW[t-1] + u[t] }
+X.RW <- X.RW[-1,] # delete initial observation which was set to 0    
+
+# plot simulated RW (X_t) and its innovations (u_xt)
+# dev.off()
+plot(
+  X.RW, type='o', 
+  pch=19, col="blue", cex = 0.5,
+  main=TeX('White Noise and Random Walk'), 
+  xlab='time', ylab='')
+abline(0,0)
+lines(u, type='o', pch=19, col="red", cex = 0.5)
+legend(
+  "bottomleft", pch=c(19,19), col=c("blue", "red"),
+  legend=c(TeX('RW: $X_t = X_{t-1} + u_{x,t}$   '), TeX('WN: $u_{x,t} \\sim iidN(0,1)$   ')))
+
+```
+
+Simulate two AR(1) processes according to $x_t = \phi x_{t-1} + u_t$, with $\phi=0.5$ and with $\phi = 1$. The ACFs of two processes indicate that in latter significant autocorrelation persists at least up to 20 lags, while the former autocorrelation becomes insignificant after 3 lags. Hence, in the case of AR(1), autocorrelation is a function of the parameter $\phi$.
+
+```{r ar, echo=FALSE, message=FALSE, warning=FALSE}
+# Simulate AR(1) and plot acf
+set.seed(102)
+sigma_ux <- 1 ; 
+T<- 200
+u    <- rnorm(T+1, mean = 0, sd = sigma_ux) #WN
+phi  <- 0.5                                 # AR 1 coefficient 
+
+X.AR1.stat    <- NA*matrix(0,T,1) # empty vector ( T X 1 )
+X.AR1.nonstat <- NA*matrix(0,T,1) # empty vector ( T X 1 )
+
+X.AR1.nonstat[1] <- 0 # both processes start at t= 0 from the value 0
+X.AR1.stat[1]    <- 0  
+for (t in 2:T){
+  X.AR1.nonstat[t] <- X.AR1.nonstat[t-1] + u[t];
+  X.AR1.stat[t]    <- phi*X.AR1.stat[t-1] + u[t] 
+}
+
+y.range <-range(as.matrix(c(X.AR1.stat,X.AR1.nonstat)),na.rm = TRUE, finite = FALSE) 
+
+par(mfrow=c(2,2))
+
+plot(
+  X.AR1.nonstat, 
+  type='o', pch=19, col="blue", cex = 0.5,
+  main=TeX('AR(1): $X_t = X_{t-1} + u_{x,t},  u_{x,t} \\sim iidN(0,1)$'), 
+  xlab='time', ylab='')
+abline(0,0)
+
+plot(
+  X.AR1.stat, 
+  type='o', pch=19, col="red", cex = 0.5,
+  main=TeX('AR(1): $X_t = 0.5 X_{t-1} + u_{x,t},  u_{x,t} \\sim iidN(0,1)$'), 
+  xlab='time', ylab='')
+
+# plot Autocorrelation function (acf)
+lag.max.acf = 20;
+acf(
+  X.AR1.nonstat, 
+  main=TeX('ACF, AR(1) NON-stationary'), 
+  lag.max = lag.max.acf, xlab = "lag ")
+
+acf(
+  X.AR1.stat, 
+  main=TeX('ACF, AR(1) stationary'), 
+  lag.max = lag.max.acf, xlab = "lag ")
+```
+
+Define a function to produces N AR(1) simulations. 
+```{r ar_function, echo=FALSE, message=FALSE, warning=FALSE}
+
+
+
+phi_vec     = c(0.95, 0.95)
+c_vec       = c(0,0)
+sigma_u_vec = c(1,1) 
+T           = 60
+
+output_temp <- independent_AR_simulation(phi_vec, c_vec, sigma_u_vec, T)
+AR_sim <- output_temp$AR_sim_mat
+u_sim  <- output_temp$u_sim_mat
+```
+
+Plot the simulated error terms of the two AR(1)s, that is $u_{x,t}$ and $u_{y,t}$. The respective ACFs indicate that the error terms are not autocorrelated.
+
+```{r acf_u_v, echo=FALSE, message=FALSE, warning=FALSE}
+par(mfrow=c(2,2))
+
+plot(
+  u_sim[,1], 
+  type='o', pch=19, col="blue", cex = 0.5,
+  main=TeX('AR innovation: $u_{x,t}$'), 
+  xlab='time', ylab='')
+abline(0,0)
+
+plot(
+  u_sim[,2], 
+  type='o', pch=19, col="red", cex = 0.5,
+  main=TeX('AR innovation: $u_{y,t}$'), 
+  xlab='time', ylab='')
+abline(0,0)
+
+# ACFs
+lag.max.acf = 30
+
+acf(
+  u_sim[,1], 
+  main=TeX('ACF, AR: $x_t = \\phi_1 x_{t-1} + u_{x,t}$'), 
+  lag.max = lag.max.acf, xlab = "lag ")
+
+acf(
+  u_sim[,2], 
+  main=TeX('ACF, AR: $y_t = \\phi_2 y_{t-1} + u_{y,t}$'), 
+  lag.max = lag.max.acf, xlab = "lag ")
+```
+
+Scatterplot of $u_{x,t}$ and $u_{y,t}$. The error terms, while individually and randomly generated, appear to to correlated, which is confirmed by the regression of $u_{y,t}$ on $u_{x,t}$. The resulting $t_\beta$ is significant.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.align='center', out.width="50%"}
+par(mfrow=c(1,1))
+plot(x = u_sim[,1], y = u_sim[,2], 
+     col = "blue", lwd =1, 
+     xlab=TeX("$u_{x,t}$"), ylab=TeX("$u_{y,t}$"),
+     main=TeX('$u_{y,t}$ vs. $u_{x,t}$'))
+reg1  <- lm(u_sim[,2] ~ u_sim[,1])
+
+abline(reg1, col="red", lwd=2)
+
+stargazer(list(reg1),type="text")
+summary(reg1)
+
+```
+
+Compare ACF of the two AR processes. Autocorrelation is present and takes a fading wave pattern.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+par(mfrow=c(2,2))
+
+plot(
+  AR_sim[,1], 
+  type='o', pch=19, col="blue", cex = 0.5,
+  main=TeX('AR: $x_t = \\phi_1 x_{t-1} + u_{x,t}$'), 
+  xlab='time', ylab='')
+abline(0,0)
+
+plot(
+  AR_sim[,2], 
+  type='o', pch=19, col="red", cex = 0.5,
+  main=TeX('AR: $y_t = \\phi_2 y_{t-1} + u_{y,t}$'), 
+  xlab='time', ylab='')
+abline(0,0)
+
+lag.max.acf = 30
+acf(
+  AR_sim[,1], 
+  main=TeX('ACF, AR: $x_t = \\phi_1 x_{t-1} + u_{x,t}$'), 
+  lag.max = lag.max.acf, xlab = "lag ")
+
+acf(
+  AR_sim[,2], 
+  main=TeX('ACF, AR: $y_t = \\phi_2 y_{t-1} + u_{y,t}$'), 
+  lag.max = lag.max.acf, xlab = "lag ")
+
+```
+
+Run a regression of two AR(1) processes. 
+```{r echo=FALSE, message=FALSE, warning=FALSE, out.width="50%", fig.align='center'}
+#################################################
+# scatterplot of y_t vs. x_t
+#################################################
+par(mfrow=c(1,1))
+plot(x = AR_sim[,1], y = AR_sim[,2], 
+     col = "blue", lwd =1, 
+     xlab=TeX("$x_{t}$"), ylab=TeX("$y_{t}$"),
+     main=TeX('$y_{t}$ vs. $x_{t}$'),   )
+
+reg2  <- lm(AR_sim[,2] ~ AR_sim[,1])
+stargazer(list(reg2),type="text")
+summary(reg2)
+abline(reg2, col="red", lwd=2) # display regression line on scatterplot (y~x)
+```
+
+Compare the regression results. The errors as well as the AR(1) are correlated given significant $\beta$s
+```{r echo=FALSE, message=FALSE, warning=FALSE, out.width="50%", fig.align='center'}
+stargazer(list(reg1,reg2), type = "text")
+# Magics: you can save tabel directly in latex !!!!!!!!!!!!!!!!!!!
+# stargazer(list(reg1,reg2),
+#           align=TRUE, type = "text", no.space = TRUE,
+#           title = "Table X", out = "fit.tex")
+```
+
