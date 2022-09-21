@@ -1,11 +1,67 @@
 ---
 title: "Annex to Econ homework"
-output: html_notebook
+output:
+  pdf_document: default
+  html_notebook: default
 ---
 
 Run required function from main book first.
 
 Annex
+
+```{r set_up, message=TRUE, warning=TRUE, include=FALSE, paged.print=FALSE}
+pkgs.installed <- installed.packages()
+pkgs.required <- c("car", "AER", "stargazer", "tictoc", "quantmod", "xts", "readr", "latex2exp", "gridExtra", "summarytools", "qwraps2", "nortest", "moments", "xtable", "sm", "astsa", "tseries", "ggplot2", "ggplotgui", "shiny", "tidyverse")
+pkgs.missing <- pkgs.required[which(!pkgs.required %in% pkgs.installed)]
+lapply(pkgs.missing, install.packages, character.only = TRUE)
+lapply(pkgs.required, require, character.only = TRUE)
+
+rm(list=ls()) # clear all variables from enviroment/workspace
+
+independent_AR_simulation<- function(phi_vec, c_vec, sigma_u_vec, T){
+  # Simulate two independent RW and run spurious regression
+  
+  # function to simulate K independent AR process with :
+  # T       = n.f simulated dates (simulated sample size)
+  # phi_vec = [\phi_1, ..., phi_N]' = autoregressive coefficients for each AR process
+  # c_vec   = [c_1, ..., c_N] = constant in AR process
+  # number of AR(1) processes to simulate
+  N <- length(phi_vec) 
+  
+  # create empty matrix T X N that will contain all simulated AR processes
+  AR_sim_mat <- NA*matrix(0,T+1,N) # empty vector ( (T+1) X 1 )
+   u_sim_mat <- NA*matrix(0,T+1,N) # empty vector ( (T+1) X 1 )
+  
+  # loop over each AR process ind1
+  for (ind1 in seq(1,N)) {
+    #ind1 = 1
+    c       <-       c_vec[ind1]
+    phi     <-     phi_vec[ind1]
+    sigma_u <- sigma_u_vec[ind1]
+
+    # simulate vector of innovations zero mean, and sd given as input
+    # set.seed(10000+ind1) # fix "seed" in order to produce same random numbers every time next line of code is called!
+    u    <- rnorm(T+1, mean = 0, sd = sigma_u) #WN
+    u_sim_mat[,ind1] <- u
+
+    # generate starting observation for the process: 
+    # unconditional mean (stationary processes) or 0 (for non-stat processes only!, as phi=1 and c/(1-phi)=NA)
+    if (abs(phi)<1){
+      AR_sim_mat[1,ind1] <- c/(1-phi) ; #start from unconditional value of the process
+    } else{
+      AR_sim_mat[1,ind1] <- 0 ; #start from unconditional value of the process
+    }
+
+    # simulate all other observations t=2 to T+1
+    for (t in seq(2,T+1)) AR_sim_mat[t,ind1] <- phi*AR_sim_mat[t-1,ind1] + u[t]
+  }
+
+  # Output of function
+  # 1 = simulated AR process
+  # 2 = simulated innovations
+  return(list(AR_sim_mat = AR_sim_mat, u_sim_mat = u_sim_mat))
+}
+```
 
 Simulate a random walk processes $y_t = y_{t-1} + e_t, y_0 = 0, e_t \sim IID(0, \sigma^2)$ analog to (14.03)
 ```{r rw, echo=FALSE, message=FALSE, warning=FALSE, fig.align = 'center', out.width="50%"}

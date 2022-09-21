@@ -8,9 +8,12 @@ output:
   html_notebook: default
 ---
 
+
+
+\section*{Question 1: Spurious Regressions (2 points)} 
 ```{r set_up, message=TRUE, warning=TRUE, include=FALSE, paged.print=FALSE}
 pkgs.installed <- installed.packages()
-pkgs.required <- c("car", "AER", "stargazer", "tictoc", "quantmod", "xts", "readr", "latex2exp", "gridExtra", "summarytools", "qwraps2", "nortest", "moments", "xtable", "sm", "astsa", "tseries", "ggplot2", "ggplotgui", "shiny", "tidyverse")
+pkgs.required <- c("car", "AER", "stargazer", "tictoc", "quantmod", "xts", "readr", "latex2exp", "gridExtra", "summarytools", "qwraps2", "nortest", "moments", "xtable", "sm", "astsa", "tseries", "ggplot2", "ggplotgui", "shiny", "tidyverse", "gridExtra")
 pkgs.missing <- pkgs.required[which(!pkgs.required %in% pkgs.installed)]
 lapply(pkgs.missing, install.packages, character.only = TRUE)
 lapply(pkgs.required, require, character.only = TRUE)
@@ -62,15 +65,8 @@ independent_AR_simulation<- function(phi_vec, c_vec, sigma_u_vec, T){
 }
 ```
 
-\section*{Question 1: Spurious Regressions (2 points)} 
-
 \subsection*{1.a. [1 Point] Replicate the analysis leading to Figure 14.1 in Davidson MacKinnon (2005, book)}
-\subsection*{1.a. (i) Compute also for each sample size T the distribution of the R2s of the MC simulations with either 7 separate histograms, or one unique figure where you report on the y-axis the 5%, 10% 25%, 50%, 75%, 90% and 95% quantiles of the distributions of the simulated R2, and on the x-axis you have T = 6, 12, 60, 120, 240, 360, 480}
-\subsection*{(ii) Similarly (either with histograms, or with one plot of the quantiles) report the distributions of the estimates t-statistics for the test of the null H0 : β2 = 0}
-\subsection*{(iii) their empirical rejection frequencies (that is the empirical size of the tests), which is exactly the figure 14.1 in Davidson MacKinnon (2005, book).}
-\subsection*{1.b [1 Point] Based on the results obtained by answering to point (a) summarize the problems of spurious regressions in econometrics.}
-
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r simulation, message=FALSE, warning=FALSE, include=FALSE}
 # N. of MC simulations
 Nsim <- 200
 
@@ -103,7 +99,10 @@ tic()
     }  
   }
 toc()
+```
 
+\subsubsection*{1.a.i} Compute also for each sample size T the distribution of the $R^2$ of the MC simulations with either 7 separate histograms, or one unique figure where you report on the y-axis the 5%, 10% 25%, 50%, 75%, 90% and 95% quantiles of the distributions of the simulated $R^2$, and on the x-axis you have T = 6, 12, 60, 120, 240, 360, 480.
+```{r charting_R2, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
 # Histogram of estimated t-statistics for beta vs. N(0,1)
 MC_R2 <- MC_mat %>% 
   as.data.frame() %>% 
@@ -111,27 +110,75 @@ MC_R2 <- MC_mat %>%
   select(T, R2) %>% 
   mutate(T = as.factor(T))
 
-graph1 <- ggplot(MC_R2, aes(x = R2, fill = T)) +
-  geom_density(position = 'identity', alpha = 0.8, adjust = 1) +
-    stat_summary(
-    geom = "vline",
-    orientation = "y",
-    # y is a required aesthetic, so use a dummy value
-    aes(y = 1, xintercept = after_stat(x)),
-    fun = function(x) {
-      quantile(x, probs = c(.05, 0.1, .25, .50, .75, .9, .95))
-    }
-  ) +
-  facet_grid( T ~ . ) +
+graph1 <- ggplot(MC_R2, aes(x = R2)) +
+  geom_histogram(color = "#787878", fill = "#0099F8", position = 'stack', binwidth = 0.05, aes(y = ..ndensity..)) + 
+  geom_density(aes(y = ..ndensity..), lwd = .2,
+               linetype = 1,
+               colour = 2) +
+  facet_grid( . ~ T, space = "free_x" ) +
   theme_bw() +
-  ggtitle(label = TeX("Distribution of $R^2$ around the 5,10,25,50,75,90 and 95% quantiles"))
+  ggtitle(label = TeX(r"(Distribution of $R^2$)")) + 
+  theme(text = element_text(size = 8)) +
+  scale_y_continuous(
+    breaks = c(.5, .10, .25, .5, .75, .90, .95),
+    labels = scales::percent
+    ) +
+  scale_x_continuous(
+    breaks = c(.25, .5, .75 ,1),
+    labels = scales::percent
+  ) +
+  ylab(label = "Quantile") + 
+  xlab(label = TeX(r"($R^2$)"))
+  
+
+graph1
 
 
+# ggplot_shiny(MC_R2)
+
+```
+
+\newpage
+\subsubsection*{1.a.ii} Similarly (either with histograms, or with one plot of the quantiles) report the distributions of the estimates t-statistics for the test of the null H0 : $\beta_2 = 0$
+```{r charting_t, echo=FALSE, message=FALSE, warning=FALSE, fig.align='center'}
+MC_beta_dist <- MC_mat %>% 
+  as.data.frame() %>% 
+  as_tibble() %>%
+  select(T, t_beta) %>% 
+  mutate(T = as.factor(T))
+
+graph1 <- ggplot(MC_beta_dist, aes(x = t_beta)) +
+  geom_histogram(color = "#787878", fill = "#0099F8", position = 'stack', aes(y = ..ndensity..)) + 
+  geom_density(aes(y = ..ndensity..), lwd = .2,
+               linetype = 1,
+               colour = 2) +
+  facet_grid( . ~ T, space = "free_x" ) +
+  theme_bw() +
+  ggtitle(label = TeX(r"(Distribution of $t_\beta$)")) + 
+  theme(text = element_text(size = 8)) +
+  scale_y_continuous(
+    breaks = c(.5, .10, .25, .5, .75, .90, .95),
+    labels = scales::percent
+    ) +
+  # scale_x_continuous(
+  #   breaks = c(.25, .5, .75 ,1),
+  #   labels = scales::percent
+  # ) +
+  ylab(label = "Quantile") + 
+  xlab(label = TeX(r"($t_\beta$)"))
+  
+
+graph1
+
+```
+
+\newpage
+\subsubsection*{1.a.iii} their empirical rejection frequencies (that is the empirical size of the tests), which is exactly the figure 14.1 in Davidson MacKinnon (2005, book).
+```{r rejection_rate, echo=FALSE, message=FALSE, warning=FALSE, fig.align='center'}
 # Empirical size of (asymptotic) t-test
 # normal quantile for 5% two sided test:
 alpha <- 0.05;
 crit_value <- qnorm(1-(alpha/2))
-
 MC_beta_reject <- MC_mat %>% 
   as.data.frame() %>% 
   as_tibble() %>%
@@ -142,25 +189,31 @@ MC_beta_reject <- MC_mat %>%
   group_by(T) %>% 
   summarise(pct_reject = sum(reject)/Nsim)
 
-graph2 <- ggplot(MC_beta_reject) +
-  geom_col(aes(x = as.factor(T), y = pct_reject*100)) +
-  ggtitle(label = TeX('% of regressions which reject $H_0: \\beta = 0$ with $t = \\frac{\\beta - 0}{\\sigma_{\\beta}}>1.96$')) +
-  ylab(label = "%") +
-  xlab(label = "T")
-
-
 graph3 <- ggplot(MC_beta_reject, aes(x = T, y = pct_reject)) +
   geom_line() +
+    labs(
+    title = TeX(r"(% of regressions which reject $H_0: \beta = 0$)"), 
+    subtitle = TeX(r"(with $t = \frac{\beta - 0}{\sigma_{\beta}}>1.96$)")
+    ) +
+  ylab(label = "%") +
+  xlab(label = "T") +
   theme_bw()
 
-
-par(mfrow=c(1,2))
-graph1
-graph2
 graph3
-
 ```
 
+\begin{enumerate}
+  \item "Spurious regression, random walk" (14.12) $y_t = \beta_1 + \beta_2 x_t + _vt$
+  \begin{itemize}
+    \item why does the RR top out at 40-50%? Should be 100\%
+  \end{itemize}
+  \item "Valid regression, random walk" (14.13) $y_t = \beta_1 + \beta_2 x_t + \beta_3 y_{t-1} + v_t,$
+  \item "Spurious regression, AR(1) process" (14.12), whereby $x_t$ and $y_t$ are generated by AR(1) with $\phi = 0.8$.
+  \item "Valid regression, AR(1) process" (14.13), whereby $x_t$ and $y_t$ are generated by AR(1) with $\phi = 0.8$.
+\end{enumerate}
+
+
+\subsection*{1.b [1 Point] Based on the results obtained by answering to point (a) summarize the problems of spurious regressions in econometrics.}
 
 
 
