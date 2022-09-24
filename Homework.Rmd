@@ -8,9 +8,8 @@ output:
   html_notebook: default
 ---
 
+\section*{Question 1: Spurious Regressions (2 points)}
 
-
-\section*{Question 1: Spurious Regressions (2 points)} 
 ```{r set_up, message=TRUE, warning=TRUE, include=FALSE, paged.print=FALSE}
 pkgs.installed <- installed.packages()
 pkgs.required <- c("car", "AER", "stargazer", "tictoc", "quantmod", "xts", "readr", "latex2exp", "gridExtra", "summarytools", "qwraps2", "nortest", "moments", "xtable", "sm", "astsa", "tseries", "ggplot2", "ggplotgui", "shiny", "tidyverse", "gridExtra")
@@ -43,7 +42,7 @@ independent_AR_simulation<- function(phi_vec, c_vec, sigma_u_vec, T){
 
     # simulate vector of innovations zero mean, and sd given as input
     # set.seed(10000+ind1) # fix "seed" in order to produce same random numbers every time next line of code is called!
-    u    <- rnorm(T+1, mean = 0, sd = sigma_u) #WN
+    u    <- rnorm(n = T+1, mean = 0, sd = sigma_u) #WN
     u_sim_mat[,ind1] <- u
 
     # generate starting observation for the process: 
@@ -66,19 +65,28 @@ independent_AR_simulation<- function(phi_vec, c_vec, sigma_u_vec, T){
 ```
 
 \subsection*{1.a. [1 Point] Replicate the analysis leading to Figure 14.1 in Davidson MacKinnon (2005, book)}
+
 ```{r simulation, message=FALSE, warning=FALSE, include=FALSE}
 # N. of MC simulations
+# Nsim <- 20000
 Nsim <- 200
 
+
 # DGP parameters : as above #############
-phi_vec     = c(1, 1)
-c_vec       = c(0,0)
-sigma_u_vec = c(1,1) 
+phi_vec     = c(1, 1, 0.8, 0.8)
+c_vec       = c(0,0, 0, 0)
+sigma_u_vec = c(1, 1, 1, 1) 
 T           = c(6, 12, 60, 120, 240, 360, 480)
 
 # empty matrix to store intercept, t-stat(intercept), beta, t-stat (beta), and R^2
-MC_mat <- NA*matrix(data = 0, nrow = length(T)*Nsim, ncol = 6)
-colnames(MC_mat) <- c("T", "intercept", "t_intercept", "beta", "t_beta", "R2")
+MC_mat <- NA*matrix(data = 0, nrow = length(T)*Nsim, ncol = 21)
+colnames(MC_mat) <- c(
+  "T", 
+  "spur_RW_intercept", "spur_RW_t_intercept", "spur_RW_beta", "spur_RW_t_beta", "spur_RW_R2",
+  "valid_RW_intercept", "valid_RW_t_intercept", "valid_RW_beta", "valid_RW_t_beta", "valid_RW_R2",
+  "spur_AR_intercept", "spur_AR_t_intercept", "spur_AR_beta", "spur_AR_t_beta", "spur_AR_R2",
+  "valid_AR_intercept", "valid_AR_t_intercept", "valid_AR_beta", "valid_AR_t_beta", "valid_AR_R2"
+  )
 
 tic()
   for (t in T) {
@@ -88,29 +96,53 @@ tic()
       # sim_idx = 1
       output_temp <- independent_AR_simulation(phi_vec, c_vec, sigma_u_vec, t)
       AR_sim <- output_temp$AR_sim_mat
-      reg_sim  <- lm(AR_sim[,2] ~ AR_sim[,1])
+      reg_sim_RW_SPURS  <- lm(AR_sim[,2] ~ AR_sim[,1])
+      reg_sim_RW_VALID  <- lm(AR_sim[,2] ~ AR_sim[,1] + lag(AR_sim[,2]))
+      reg_sim_AR_SPURS  <- lm(AR_sim[,4] ~ AR_sim[,3])
+      reg_sim_AR_VALID  <- lm(AR_sim[,4] ~ AR_sim[,3] + lag(AR_sim[,4]))
       mat_idx = (t_idx-1) * Nsim + sim_idx
       MC_mat[mat_idx, 1] <- t  # T
-      MC_mat[mat_idx, 2] <- summary(reg_sim)$coefficients[,1][1]  # intercept : value
-      MC_mat[mat_idx, 3] <- summary(reg_sim)$coefficients[,3][1]  # intercept : t-stat
-      MC_mat[mat_idx, 4] <- summary(reg_sim)$coefficients[,1][2]  # beta : value
-      MC_mat[mat_idx, 5] <- summary(reg_sim)$coefficients[,3][2]  # beta : t-stat
-      MC_mat[mat_idx, 6] <- summary(reg_sim)$r.squared            # R^2
+      MC_mat[mat_idx, 2] <- summary(reg_sim_RW_SPURS)$coefficients[1,1]  # intercept : value
+      MC_mat[mat_idx, 3] <- summary(reg_sim_RW_SPURS)$coefficients[1,3]  # intercept : t-stat
+      MC_mat[mat_idx, 4] <- summary(reg_sim_RW_SPURS)$coefficients[2,1]  # beta : value
+      MC_mat[mat_idx, 5] <- summary(reg_sim_RW_SPURS)$coefficients[2,3]  # beta : t-stat
+      MC_mat[mat_idx, 6] <- summary(reg_sim_RW_SPURS)$r.squared          # R^2
+      
+      MC_mat[mat_idx, 7] <- summary(reg_sim_RW_VALID)$coefficients[1,1]  # intercept : value
+      MC_mat[mat_idx, 8] <- summary(reg_sim_RW_VALID)$coefficients[1,3]  # intercept : t-stat
+      MC_mat[mat_idx, 9] <- summary(reg_sim_RW_VALID)$coefficients[2,1]  # beta : value
+      MC_mat[mat_idx, 10] <- summary(reg_sim_RW_VALID)$coefficients[2,3]  # beta : t-stat
+      MC_mat[mat_idx, 11] <- summary(reg_sim_RW_VALID)$r.squared          # R^2
+      
+      MC_mat[mat_idx, 12] <- summary(reg_sim_AR_SPURS)$coefficients[1,1]  # intercept : value
+      MC_mat[mat_idx, 13] <- summary(reg_sim_AR_SPURS)$coefficients[1,3]  # intercept : t-stat
+      MC_mat[mat_idx, 14] <- summary(reg_sim_AR_SPURS)$coefficients[2,1]  # beta : value
+      MC_mat[mat_idx, 15] <- summary(reg_sim_AR_SPURS)$coefficients[2,3]  # beta : t-stat
+      MC_mat[mat_idx, 16] <- summary(reg_sim_AR_SPURS)$r.squared          # R^2
+      
+      MC_mat[mat_idx, 17] <- summary(reg_sim_AR_VALID)$coefficients[1,1]  # intercept : value
+      MC_mat[mat_idx, 18] <- summary(reg_sim_AR_VALID)$coefficients[1,3]  # intercept : t-stat
+      MC_mat[mat_idx, 19] <- summary(reg_sim_AR_VALID)$coefficients[2,1]  # beta : value
+      MC_mat[mat_idx, 20] <- summary(reg_sim_AR_VALID)$coefficients[2,3]  # beta : t-stat
+      MC_mat[mat_idx, 21] <- summary(reg_sim_AR_VALID)$r.squared          # R^2
     }  
   }
 toc()
 ```
 
-\subsubsection*{1.a.i} Compute also for each sample size T the distribution of the $R^2$ of the MC simulations with either 7 separate histograms, or one unique figure where you report on the y-axis the 5%, 10% 25%, 50%, 75%, 90% and 95% quantiles of the distributions of the simulated $R^2$, and on the x-axis you have T = 6, 12, 60, 120, 240, 360, 480.
+\subsubsection*{1.a.i}
+
+Compute also for each sample size T the distribution of the $R^2$ of the MC simulations with either 7 separate histograms, or one unique figure where you report on the y-axis the 5%, 10% 25%, 50%, 75%, 90% and 95% quantiles of the distributions of the simulated $R^2$, and on the x-axis you have T = 6, 12, 60, 120, 240, 360, 480.
+
 ```{r charting_R2, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
 # Histogram of estimated t-statistics for beta vs. N(0,1)
 MC_R2 <- MC_mat %>% 
   as.data.frame() %>% 
   as_tibble() %>%
-  select(T, R2) %>% 
+  select(T, spur_RW_R2) %>% 
   mutate(T = as.factor(T))
 
-graph1 <- ggplot(MC_R2, aes(x = R2)) +
+graph1 <- ggplot(MC_R2, aes(x = spur_RW_R2)) +
   geom_histogram(color = "#787878", fill = "#0099F8", position = 'stack', binwidth = 0.05, aes(y = ..ndensity..)) + 
   geom_density(aes(y = ..ndensity..), lwd = .2,
                linetype = 1,
@@ -138,16 +170,20 @@ graph1
 
 ```
 
+```{=tex}
 \newpage
-\subsubsection*{1.a.ii} Similarly (either with histograms, or with one plot of the quantiles) report the distributions of the estimates t-statistics for the test of the null H0 : $\beta_2 = 0$
+\subsubsection*{1.a.ii}
+```
+Similarly (either with histograms, or with one plot of the quantiles) report the distributions of the estimates t-statistics for the test of the null H0 : $\beta_2 = 0$
+
 ```{r charting_t, echo=FALSE, message=FALSE, warning=FALSE, fig.align='center'}
 MC_beta_dist <- MC_mat %>% 
   as.data.frame() %>% 
   as_tibble() %>%
-  select(T, t_beta) %>% 
+  select(T, spur_RW_t_beta) %>% 
   mutate(T = as.factor(T))
 
-graph1 <- ggplot(MC_beta_dist, aes(x = t_beta)) +
+graph1 <- ggplot(MC_beta_dist, aes(x = spur_RW_t_beta)) +
   geom_histogram(color = "#787878", fill = "#0099F8", position = 'stack', aes(y = ..ndensity..)) + 
   geom_density(aes(y = ..ndensity..), lwd = .2,
                linetype = 1,
@@ -172,48 +208,95 @@ graph1
 
 ```
 
+```{=tex}
 \newpage
-\subsubsection*{1.a.iii} their empirical rejection frequencies (that is the empirical size of the tests), which is exactly the figure 14.1 in Davidson MacKinnon (2005, book).
+\subsubsection*{1.a.iii}
+```
+their empirical rejection frequencies (that is the empirical size of the tests), which is exactly the figure 14.1 in Davidson MacKinnon (2005, book).
+
 ```{r rejection_rate, echo=FALSE, message=FALSE, warning=FALSE, fig.align='center'}
 # Empirical size of (asymptotic) t-test
 # normal quantile for 5% two sided test:
 alpha <- 0.05;
 crit_value <- qnorm(1-(alpha/2))
+
 MC_beta_reject <- MC_mat %>% 
   as.data.frame() %>% 
   as_tibble() %>%
+  select(T, spur_RW_t_beta, valid_RW_t_beta, spur_AR_t_beta, valid_AR_t_beta) %>% 
   mutate(
     t_crit = crit_value,
-    reject = ifelse(t_beta > t_crit,1,0)
+    reject_spur_RW = ifelse(abs(spur_RW_t_beta) > t_crit,1,0),
+    reject_valid_RW = ifelse(abs(valid_RW_t_beta) > t_crit,1,0),
+    reject_spur_AR = ifelse(abs(spur_AR_t_beta) > t_crit,1,0),
+    reject_valid_AR = ifelse(abs(valid_AR_t_beta) > t_crit,1,0)
     ) %>% 
   group_by(T) %>% 
-  summarise(pct_reject = sum(reject)/Nsim)
+  summarise(
+    pct_reject_spur_RW = sum(reject_spur_RW)/Nsim,
+    pct_reject_valid_RW = sum(reject_valid_RW)/Nsim,
+    pct_reject_spur_AR = sum(reject_spur_AR)/Nsim,
+    pct_reject_valid_AR = sum(reject_valid_AR)/Nsim,
+    )
 
-graph3 <- ggplot(MC_beta_reject, aes(x = T, y = pct_reject)) +
-  geom_line() +
+graph3 <- ggplot(MC_beta_reject, aes(x = T)) +
+  geom_line(linetype = "dotted", aes(y = pct_reject_spur_RW)) +
+  geom_line(linetype = "dotted", aes(y = pct_reject_valid_RW)) +
+  geom_line(linetype = "solid", aes(y = pct_reject_spur_AR)) +
+  geom_line(linetype = "solid", aes(y = pct_reject_valid_AR)) +
     labs(
     title = TeX(r"(% of regressions which reject $H_0: \beta = 0$)"), 
     subtitle = TeX(r"(with $t = \frac{\beta - 0}{\sigma_{\beta}}>1.96$)")
     ) +
+  geom_text(aes(x = 400, y = 0.8, label = "spurious regression RW")) +
+  geom_text(aes(x = 400, y = 0.5, label = "spurious regression AR(1)")) +
+  geom_text(aes(x = 400, y = 0.25, label = "valid regression RW")) +
+  geom_text(aes(x = 400, y = 0.05, label = "valid regression AR(1)")) +
   ylab(label = "%") +
   xlab(label = "T") +
-  theme_bw()
+  theme_bw() +
+  theme(text = element_text(size = 8))
+  
 
 graph3
 ```
 
-\begin{enumerate}
-  \item "Spurious regression, random walk" (14.12) $y_t = \beta_1 + \beta_2 x_t + _vt$
-  \begin{itemize}
-    \item why does the RR top out at 40-50%? Should be 100\%
-  \end{itemize}
-  \item "Valid regression, random walk" (14.13) $y_t = \beta_1 + \beta_2 x_t + \beta_3 y_{t-1} + v_t,$
-  \item "Spurious regression, AR(1) process" (14.12), whereby $x_t$ and $y_t$ are generated by AR(1) with $\phi = 0.8$.
-  \item "Valid regression, AR(1) process" (14.13), whereby $x_t$ and $y_t$ are generated by AR(1) with $\phi = 0.8$.
-\end{enumerate}
-
-
 \subsection*{1.b [1 Point] Based on the results obtained by answering to point (a) summarize the problems of spurious regressions in econometrics.}
 
+Spurious regression as outlined in Davidson MacKinnon occurs for two reasons:
 
+```{=tex}
+\begin{enumerate}
+  \item incorrectly specified $H_0$ and
+  \item standard asymptotic results do not hold whenever at least one of the regressors is I(1), even when a model is correctly specified
+\end{enumerate}
+```
+The $H_0: \beta_2=0$ tested with the model (14.12) $$y_t = \beta_1 + \beta_2y_{t-1} + v_t$$ implies a DGP': $y_t = \beta_1 + v_t$, when $y_t$ is actually generated using DGP (14.01) $y_t = y_{t-1} + v_t, y_0=0, v_t \sim iidN(0,1)$.
 
+The wrongly specified $H_0$ is rejected with increasing frequency in n. This merely confirms that $y_t$ is not generated by the implied DGP'. Correctly specifying the model as (14.13) $$y_t = \beta_1 + \beta_2 x_t + \beta_3 y_{t-1} + v_t$$ and testing $H_0:\beta_2=0$, implying $\beta_3=1$ reduces the model to the actual DGP (14.01). This treatment, however, does not completely eliminate the problem i.e. leaves the rejection rate still significantly above 0.
+
+For $\hat{\beta}$ to converge to $\beta_0$ asymtotically, the bias $(\hat{\beta} - \beta_0)$ must be $O_p(1)$: \begin{align*}
+  (\hat{\beta} - \beta_0) &= (X'X)^{-1}X'u, with\\
+  (X'X)^{-1} &\in O_p(n^{-1}) and \\
+  X'u &\in O_p(n^{.5}). consequently:\\
+  n^{.5}(\hat{\beta} - \beta_0) &= n^{.5}(X'X)^{-1}X'u = n^{.5} O_p(n^{-1})O_p(n^{.5}) = O_p(1)
+\end{align*}
+
+The relevant assumption to be tested is therefore is $(X'X) \in n^{.5} O_p(n^{-1})$.
+
+The random walk (14.01) is I(1), due to: \begin{align*}
+  w_t &= w_{t-1}+\epsilon_t \\
+  w_t - w_{t-1} &= \epsilon_t \\
+  (1-L)w_t  &= \epsilon_t \\
+  (1-\phi(z))w_t &= \epsilon_t \\
+  \phi(z) &= 1
+\end{align*} Consequently, both $x_t$ and $y_t$ are I(1).
+
+Further, (14.01) reduces to $w_t = \sum^t_{s=1}{\epsilon_s}$, which enters as X'X or: 
+\begin{align*}
+  \sum_{t=1}^n \left( \sum_{r=1}^t \sum_{s=1}^t \right) \epsilon_r \epsilon_s &= \sum_{t=1}^n \sum_{r=1}^t E(\epsilon_r^2), \epsilon_r\epsilon_s=0 \;\forall r \ne s\\
+  \sum_{t=1}^n \sum_{r=1}^t \sigma^2 &= \sum_{t=1}^n \sum_{r=1}^t 1 \\
+  \sum_{t=1}^n t  &= \frac{1}{2}n(n+1)
+\end{align*}
+
+Consequently, given (14.01) being I(1), $X'X \in O_p(n^2)$ and therefore cannot possibly converge to a finite probablity limit. The bias $(\hat{\beta} - \beta_0)$ therefore does not converge asymptotically in probability.
