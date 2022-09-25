@@ -1,7 +1,7 @@
 ---
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 \section*{Question 2: Time Series regression test of CAPM for one asset i (3 points)}
 Black, Jensen and Scholes (1972) suggest to test the empirical validity of the CAPM by estimating the following LRM: 
