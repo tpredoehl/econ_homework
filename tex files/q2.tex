@@ -1,8 +1,14 @@
----
-output:
-  pdf_document: default
-  html_document: default
----
+\documentclass[]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+%opening
+\title{}
+\author{}
+
+\begin{document}
+
+\maketitle
+
 \section*{Question 2: Time Series regression test of CAPM for one asset i (3 points)}
 Black, Jensen and Scholes (1972) suggest to test the empirical validity of the CAPM by estimating the following LRM: 
 
@@ -155,3 +161,5 @@ Analog to (ii) and replacing the unknown true $\omega_i$ with the sample $\hat{\
 \end{align*}
 
 The t-statistic to test $H_0: \beta_{k=1} = \alpha_i = 0$ therefore is : $$ \xi_i = \frac{\hat{\alpha}_i - 0}{\hat{\omega}_i[(1+\frac{\bar{z}_m^2}{\hat{\sigma}_m^2})/T]^{1/2}}  \xrightarrow{d}  N(0,1)$$
+
+\end{document}

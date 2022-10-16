@@ -1,0 +1,101 @@
+---
+title: "Question 4"
+output:
+  pdf_document:
+    extra_dependencies: ["subcaption"]
+  html_notebook: default
+---
+
+```{r setup, message=FALSE, warning=FALSE, include=FALSE}
+require(tidyverse)
+library(dplyr)
+library(broom)
+require(magrittr)
+require(frenchdata)
+# load FF10 data from .Rda file
+# load(file = "ff10_sample_1927_2022.Rda")
+# load(file = "ff10_sample.Rda")
+# alternative load from FF website using FF package
+
+ff_factors <- download_french_data('Fama/French 3 Factors')
+ff_factors_monthly <- ff_factors$subsets$data[[1]]
+
+ff_size <- download_french_data('Portfolios Formed on Size')
+targetSubset <- which(ff_size$subsets$name == "Value Weight Returns -- Monthly")
+ff_10_size_monthly_vw <- ff_size$subsets$data[[targetSubset]]
+
+# # join data sets
+decileCols <- c("Lo 10", "Dec 2","Dec 3", "Dec 4", "Dec 5", "Dec 6", "Dec 7", "Dec 8", "Dec 9", "Hi 10")
+ff_temp <- left_join(x = ff_10_size_monthly_vw, y = ff_factors_monthly, by = "date") %>% filter(date < 199901)
+
+```
+
+\section{(  a  )[3points] Write  the  R  code  to  replicate  Figures  15.1  and  15.2  in  Cochrane, 2009.  Note  that  these  figures  use monthly  data  from  1926  to 1998.  Display  the two  figures you have produced with your R code.What do these Figures tell us about the CAPM?}
+
+Reproduce the following graphs from Cochrane, 2009
+\begin{figure}
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{Cochrane_15_1.png}
+  \caption{A subfigure}
+  \label{fig:sub1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=1\linewidth]{Cochrane_15_2.png}
+  \caption{A subfigure}
+  \label{fig:sub2}
+\end{subfigure}
+\caption{A figure with two subfigures}
+\label{fig:test}
+\end{figure}
+
+Replication of 15.1 time series regression $E(R^e) = \beta E(R^{em})$. Set-up of regression analysis:
+\begin{itemize}
+  \item download value weighted, size sorted portfolio returns
+  \item filter data on 1926-1998 time frame
+  \item for each decile calculate average excess return
+  \item for each decile, regress Re-Rf on Rm-Rf
+\end{itemize}
+
+```{r TS_reg, echo=FALSE, message=FALSE, warning=FALSE, fig.show="hold", out.width="50%"}
+
+minusRF <- function(x) x-ff_temp$RF
+ff_temp2 <- ff_temp %>% 
+  select(all_of(decileCols), "Mkt-RF") %>% 
+  mutate_at(decileCols, minusRF) %>% 
+  pivot_longer(cols = decileCols, names_to = "Decile", values_to = "Re") %>% 
+  select(Decile, Re, Rm = `Mkt-RF`) %>% 
+  nest(data = -Decile) %>% 
+  mutate(
+    fit = map(data, ~ lm(Re ~ Rm - 1, data = .x)),
+    RE  = map(data, ~ mean(.x$Re)),
+    RM  = map(data, ~ mean(.x$Rm)),
+    tidied = map(fit, tidy)
+  ) %>% 
+  unnest(c(tidied, RE, RM))
+
+plot_15_1 <- ggplot(ff_temp2, aes(x=estimate, y=RE))+
+  scale_x_continuous(limits = c(0,1.6))+
+  scale_y_continuous(limits = c(0,1.6))+
+  geom_point()+
+  geom_point(aes(x=1, y=RM), color="red")+
+  geom_abline(intercept = 0, slope = ff_temp2$RM[1]) +
+  xlab("betas") + 
+  ylab("Mean mothly return %")
+
+plot_15_2 <- ggplot(ff_temp2, aes(x=estimate, y=RE))+
+  scale_x_continuous(limits = c(0,1.6))+
+  scale_y_continuous(limits = c(0,1.6))+
+  geom_point()+
+  geom_point(aes(x=1, y=RM), color="red")+
+  geom_abline(intercept = 0, slope = ff_temp2$RM[1], linetype = "dashed") +
+  geom_smooth(method = lm, formula = y ~ x - 1, fullrange = TRUE, se = FALSE)
+
+par(mfrow = c(2,1))
+plot_15_1
+plot_15_2
+
+```
+
