@@ -37,7 +37,7 @@ NOTE : $\hat{\alpha_i}$ is the Jensen’s alpha, and represents an estimate of t
 	1 + \frac{\bar{z}_m^2}{\hat{\sigma}_m^2} & \frac{-\bar{z}_m}{\hat{\sigma}_m^2} \\
 	\frac{-\bar{z}_m}{\hat{\sigma}_m^2} & \frac{1}{\hat{\sigma}^2}
 	\end{array}\right]\\
-	Sxz_i &= X'z_i = \left[\begin{array}{c}
+	Sxz_i &= \frac{1}{T} X'z_i = \left[\begin{array}{c}
 		\bar{z}_i \\
 		\frac{1}{T}\sum{z_m z_i}
 	\end{array}\right] = \left[\begin{array}{c}
@@ -151,7 +151,7 @@ Analog to (ii) and replacing the unknown true $\omega_i$ with the sample $\hat{\
 	V((\hat{\beta} - \beta)|z_m) &= \hat{\omega}_i^2 (X'X)^{-1} = \hat{\omega}_i^2 \frac{1}{T}Sxx^{-1}\\
 	V((\hat{\beta}_{k=1} - 0)|z_m) &= \omega_i^2 (X'X)_{kk}^{-1} = \hat{\omega}_i^2 \frac{1}{T}Sxx_{kk}^{-1}\\
 	&=  \frac{\hat{\omega}_i^2}{T}(1+\frac{\bar{z}_m^2}{\hat{\sigma}_m^2})\\
-	SE((\hat{\beta} - \beta)|z_m) &= \hat{\omega}_i[(1+\frac{\bar{z}_m^2}{\hat{\sigma}_m^2})/T]^{1/2}
+	SE((\hat{\beta}_{k=1} - 0)|z_m) &= \hat{\omega}_i[(1+\frac{\bar{z}_m^2}{\hat{\sigma}_m^2})/T]^{1/2}
 \end{align*}
 
 The t-statistic to test $H_0: \beta_{k=1} = \alpha_i = 0$ therefore is : $$ \xi_i = \frac{\hat{\alpha}_i - 0}{\hat{\omega}_i[(1+\frac{\bar{z}_m^2}{\hat{\sigma}_m^2})/T]^{1/2}}  \xrightarrow{d}  N(0,1)$$
