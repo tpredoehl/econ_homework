@@ -1,0 +1,210 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{setspace}
+\usepackage{indentfirst}
+\usepackage{parskip}
+
+%\usepackage{easyReview} %used for annotation. Cannot be run together with (changes) - command "highlight" defined twice
+\usepackage{changes}%use while actively annotating
+
+%\usepackage[final]{changes} % once we are happy with all annotation, we can accept all proposed changes and show only the final document.
+
+% simply select text you want to annotate and start typing the command \replacedGM{the selected text will appear here}{and here you enter the new replacement text}
+\definechangesauthor[name={Timo}, color=orange]{tp}
+\definechangesauthor[name={Giovanni}, color=green]{gm}
+\newcommand{\replacedTP}[2]{\replaced[id=tp]{#2}{#1}}
+\newcommand{\addedTP}[1]{\added[id=tp]{#1}}
+\newcommand{\deletedTP}[1]{\deleted[id=tp]{#1}}
+\newcommand{\highlightTP}[1]{\highlight[id=tp]{#1}}
+
+\newcommand{\replacedGM}[2]{\replaced[id=gm]{#2}{#1}}
+\newcommand{\addedGM}[1]{\added[id=gm]{#1}}
+\newcommand{\deletedGM}[1]{\deleted[id=gm]{#1}}
+\newcommand{\highlightGM}[1]{\highlight[id=gm]{#1}}
+
+%opening
+\title{Foundation of Econometrics - Homework}
+\author{Giovanni Maffei, Timo Predöhl}
+
+\begin{document}
+	
+	\maketitle
+	
+	\begin{spacing}{1}
+		\tableofcontents		
+	\end{spacing}
+	
+	\pagebreak
+	\section{Exercise 2: Univariate Time Series Regression and Jensen's alpha}
+	\subsection{Set-up and Definitions}
+	\begin{itemize}
+		\item We are assuming a timeseries regression for one asset: $i=1,...,N$, with N corresponding to the total number of securities available in the investable universe:
+			\begin{align} \label{timeseries}
+				r_{it} &= \alpha_i + \beta_{im} z_{mt} + u_{it} \quad t = 1,...,T \\ 
+				u_i|z_{mt} &\overset{iid}{\sim} (0, w_{i}^2) \notag \\ \notag
+			\end{align} \vspace{-3em}
+		\item $X$ is the matrix of the regressors.	
+		\item $E[x_ix_i']$ exists, and is definite positive.	
+		\item ${Rank}(X)$ = 2 (no redunant regressors), hence $(X'X)^{-1}$ exists.	
+		\item $\hat{\alpha_i}$ and $\hat{\beta}_{im}$ are the OLS estimators of $\alpha$ and $\beta$ in \ref{timeseries}.
+		\item $z_{mt}$ corresponds to the return of a market index (used as proxy of the market portfolio) at time $t$. 
+	\end{itemize}
+	\subsection{Part 1: Demonstrate that $\hat{\alpha}_i = \overline{r}_{i} - \hat{\beta_i}\overline{z}_{m}$ and $\hat{\beta_i} = \frac{\hat{\sigma}_{im}}{\hat{\sigma_{m}^2}}$} 
+	Noting that if we substitute the intercept by adding $1_T$ as the first column of the regressors matrix: $X$, we can rewrite \ref{timeseries} in the following matricial representation: $r_{i,(1\times T)} =X_{i,(T\times 2)} \beta_{i,(2\times 1)} + u_{i,(T\times1)}$, with X  defined as a (1 x 2) matrix: $[1_{(T x 1)},z_{m,(T x 1)}]\footnote{The second term of each matrix subscript is meant to represent the dimension of the corresponding metric for the avoidance of doubt, we will drop such notation for tractability reasons.}$.\\
+	Additionally, recalling that: i) the OLS estimator of $\alpha_i$ and $\beta_{im}$ corresponds to: $(X'X)^{-1}X'r_i$, ii) $1_{T}'1_T=T$ and iii) the inverse of $(X'X)^{-1}$ is:
+	\begin{align} \label{(X'X)^-1}
+		\begin{bmatrix}
+		a & b \\ c & d
+		\end{bmatrix}
+		^{-1} &= \frac{1}{ad-bc}
+		\begin{bmatrix}
+		d & -b \\ -c & a
+		\end{bmatrix} \notag \\
+			(X'X)^{-1} &= \frac{1}{T\sum_{t=1}^{T}z_{mt}^2-(\sum_{t=1}^{T}z_{mt})^2} \begin{bmatrix} \sum_{t=1}^{T}z_{mt}^2 & -\sum_{t=1}^{T}z_{mt} \\ -\sum_{t=1}^{T}z_{mt} & T \end{bmatrix} 
+	\end{align}
+	And observing $X'r_{i} = \begin{bmatrix} \sum_{t=1}^{T}r_{it} \\ \sum_{t=1}^{T}z_{mt}r_{it} \end{bmatrix} $, we derive that:
+	\begin{align} \label{derivation}
+	\hat{\beta_i} &= (X'X)^{-1}X'r_i \notag \\
+				&= \begin{bmatrix}
+				\frac{T(\frac{1}{T}\sum_{t=1}^{T}z_{mt}^2) T(\frac{1}{T}\sum_{t=1}^{T}r_{it}) - T(\frac{1}{T}\sum_{t=1}^{T}z_{mt})T(\frac{1}{T}\sum_{t=1}^{T}z_{mt}r_{it})}{T^2(\frac{1}{T}\sum_{t=1}^{T}z_{mt}^2)-T^2(\frac{1}{T}\sum_{t=1}^{T}z_{mt})^2} \\ \frac{T^2(\frac{1}{T}\sum_{t=1}^{T}z_{mt}r_{it}) - T(\frac{1}{T}\sum_{t=1}^{T}z_{mt}) T(\frac{1}{T}\sum_{t=1}^{T}r_{it})}{T^2(\frac{1}{T}\sum_{t=1}^{T}z_{mt}^2)-T^2(\frac{1}{T}\sum_{t=1}^{T}z_{mt})^2} 
+				\end{bmatrix}
+	\end{align}
+Besides, we can further refine this expression by noting:
+\begin{itemize}
+\item $\frac{1}{T}\sum_{t=1}^{T}z_{mt} =\overline{z}_m $
+\item $\frac{1}{T}\sum_{t=1}^{T}r_{it} =\overline{r}_i $
+\item $T^2(\frac{1}{T}\sum_{t=1}^{T}z_{mt}^2)-T^2(\frac{1}{T}\sum_{t=1}^{T}z_{mt})^2 = T^2\hat{\sigma}_{m}^2 $, with $\hat{\sigma}_{m}^2$ as the variance of the market index returns.
+\item $T^2(\frac{1}{T}\sum_{t=1}^{T}z_{mt}r_{it}) - T(\frac{1}{T}\sum_{t=1}^{T}z_{mt}) T(\frac{1}{T}\sum_{t=1}^{T}r_{it}) = T^2\hat{\sigma}_{z,i}$, with $\hat{\sigma}_{z,i} $ as the covariance between the returns of the single asset and the market index.
+\item $T(\frac{1}{T}\sum_{t=1}^{T}z_{mt}^2) T(\frac{1}{T}\sum_{t=1}^{T}r_{it}) - T(\frac{1}{T}\sum_{t=1}^{T}z_{mt})T(\frac{1}{T}\sum_{t=1}^{T}z_{mt}r_{it}) = \\ 
+= T^2\overline{r}_i(\frac{1}{T}(\sum_{t=1}^{T}z_{mt}^2-\overline{z}_m{^2})- T^2\overline{z}_m(\frac{1}{T}(\sum_{t=1}^{T}z_{mt}r_{it}-\overline{z}_m\overline{r}_i) \\
+= T^2(\overline{r}_i\hat{\sigma}_{m}^2 -\overline{z}_m\hat{\sigma}_{z,i})$
+\end{itemize}
+By substituting the formulae above into \ref{derivation}, we derive:
+\begin{align}
+			\hat{\beta_i} &= \begin{bmatrix} \hat{\alpha_i} \\ \hat{\beta}_{im} \end{bmatrix} \notag \\
+ 			&= \begin{bmatrix} \frac{\overline{r}_i\hat{\sigma}_{m}^2-\overline{z}_m\hat{\sigma}_{z,i}}{\hat{\sigma}_{m}^2} \\ \frac{\hat{\sigma}_{z,i}}{\hat{\sigma}_{m}^2} \end{bmatrix} \notag \\
+ 			&= \begin{bmatrix} \overline{r}_i - \overline{z}_m\hat{\beta}_{im} \\ \frac{\hat{\sigma}_{z,i}}{\hat{\sigma}_{m}^2} \end{bmatrix}
+\end{align}
+\subsection{Part 2: Demonstrate the asymptotic distribution of $\hat{\beta_i}|z_m$}
+As we are not assuming any specific form for $u_i|z_{mt}$, we will study the distribution of $\hat{\beta_i}|z_m$ asymptotically ($T \to \infty$). Therefore, by rearranging the definition of $\hat{\beta_i}$ we derive:  
+\begin{align*}
+\hat{\beta_i} | z_{mt} &= (X'X)^{-1}X'r_i = \beta_i + (X'X)^{-1}X'u_i \\
+\sqrt{T}(\hat{\beta_i} -\beta_i) &= \sqrt{T}(X'X)^{-1}X'u_i \\
+&= (\frac{X'X}{T})^{-1}\sqrt{T}X'u_i 
+\end{align*}
+Further noting that (under $T \to +\infty$):
+\begin{itemize}
+\item $(\frac{X'X}{T}) \overset{p}{\to} E[x_ix_i']$ due to the application of the Law of Large Numbers (LLN) because $[x_{it}]_{t=1}^T$ is a sequence of IID observations with finite expected value and variance. Additionally, by using the Slutsky's theorem we obtain: $(\frac{X'X}{T})^{-1} \overset{p}{\to} E[x_ix_i']^{-1}$. 	
+\item $X'u_i \overset{d}{\to} X'N(0,w_i^2I_T)X$ due to the application of the Central Limit Theorem (CLT) in light of: i) IID observations, ii) errors uncorrelated with the regressors and iii) finite moments\footnote{As mentioned in the \textit{Set-up and Definitions} part of this exercise.}.
+\end{itemize}
+By applying the properties of the multivariate Normal distribution, we obtain:
+\begin{align*}
+\hat{\beta_i} \overset{d}{\to} N(\beta_i, (X'X)^{-1}X'w_i^2I_TX(X'X)^{-1})
+\end{align*}
+Simplifying the variance term of the distribution of $\hat{\beta_i}$:
+\begin{align*}
+V(\hat{\beta_i}) &= (X'X)^{-1}X'w_i^2I_TX(X'X)^{-1} \\
+&= w_i^2 (X'X)^{-1}
+\end{align*}
+Additionally, we can rewrite \ref{(X'X)^-1} as per below:
+\begin{align} \label{X'X rearranged}
+(X'X)^{-1} &=  \frac{1}{T^2\hat{\sigma}_{m}^2} 
+				\begin{bmatrix} (\sum_{t=1}^{T}z_{mt}^2) -T\overline{z}_m^2 + T\overline{z}_m^2 & -T\overline{z}_m \\ -T\overline{z}_m & T \end{bmatrix} \notag \\
+			&= 	\frac{1}{T^2\hat{\sigma}_{m}^2}
+			    \begin{bmatrix} (T\hat{\sigma}_{m}^2 + T\overline{z}_m^2) & -T\overline{z}_m \\ -T\overline{z}_m & T \end{bmatrix} \notag \\
+			&=  \frac{1}{T} 
+				\begin{bmatrix} (1 + \frac{\overline{z}_m^2}{\hat{\sigma}_{m}^2}) & \frac{-\overline{z}_m}{\hat{\sigma}_{m}^2} \\ \frac{-\overline{z}_m}{\hat{\sigma}_{m}^2} & \frac{1}{\hat{\sigma}_{m}^2} \end{bmatrix}   
+\end{align}
+Eventually, we conclude this demonstration by expanding $\hat{\beta}_i$ into its components and by replacing \ref{X'X rearranged} into $\hat{\beta}_i \overset{d}{\to} N(\beta_i,V(\hat{\beta_i})$:
+\begin{align}
+\begin{bmatrix} \hat{\alpha_i} \\ \hat{\beta}_{im} \end{bmatrix}
+\sim N(\begin{bmatrix} \alpha_i \\ \beta_{im} \end{bmatrix}, \frac{w_i^2}{T}\begin{bmatrix} (1 + \frac{\overline{z}_m^2}{\hat{\sigma}_{m}^2}) & \frac{-\overline{z}_m}{\hat{\sigma}_{m}^2} \\ \frac{-\overline{z}_m}{\hat{\sigma}_{m}^2} & \frac{1}{\hat{\sigma}_{m}^2} \end{bmatrix}) 
+\end{align}
+\subsection{Part 3: Demonstrate the t-statistics to test $H_0$: $\alpha_i = 0 $}
+We add below a few considerations additional to what presented in \textit{Set-up and Definitions} to support this proof:
+\begin{itemize}
+\item We are studying the asymptotic distribution of this test under $T \to +\infty$\footnote{Indeed, no distribution is provided for the errors in \ref{timeseries}.}.	
+\item This is a linear hypothesis test, with $m = 1$ linear restrictions tested\footnote{The only restriction we are imposing on $\beta_i$ is: $\alpha_i = 0 $.}.
+\item The generic matrix R (m x K), formalizing the linear restrictions on $\beta$, corresponds to the vector $\begin{bmatrix} 1 & 0 \end{bmatrix}$.
+\item The generic vector q (m x 1) represents the restricted values imposed on $\beta$. As we are imposing only one restriction, q corresponds to a scalar metric: 0.
+\item As we don't know the actual variance of $u_i|z_{mt}$ but we estimate the corresponding OLS residuals, we utilize $\frac{1}{T}\sum_{t=1}^{T}\hat{u}_{it}^2$ as an asymptotically unbiased estimator by applying the LLN\footnote{$\overline{u}_i = 0$ because of the inclusion of the intercept in $X$.}.
+\end{itemize}
+Under the null hypothesis $H_0$: $R\beta_i=q$:
+\begin{align*}
+R\hat{\beta_i}-q = R(\hat{\beta_i} - \beta_i)
+\end{align*}
+Furthermore, as proved in the previous exercise and by applying the properties of the multivariate Gaussian distribution, we derive:
+\begin{align} \label{2.3}
+R(\hat{\beta}_i-\beta_i) &\sim N(0, RV(\beta_i)R') \notag \\
+[RV(\beta_i)R']^{-\frac{1}{2}}R(\hat{\beta}_i-\beta_i) &\overset{d}{\to} N(0,I_m)
+\end{align}
+By substituting for $R=\begin{bmatrix} 1 & 0 \end{bmatrix}$ in $RV(\beta_i)R'$ and rearranging the terms:
+\begin{align*}
+RV(\beta_i)R' &= \frac{w_i{^2}}{T} \begin{bmatrix} 1 & 0 \end{bmatrix} \begin{bmatrix} (1 + \frac{\overline{z}_m^2}{\hat{\sigma}_{m}^2}) & \frac{-\overline{z}_m}{\hat{\sigma}_{m}^2} \\ \frac{-\overline{z}_m}{\hat{\sigma}_{m}^2} & \frac{1}{\hat{\sigma}_{m}^2} \end{bmatrix} \begin{bmatrix} 1 \\ 0 \end{bmatrix} \\
+&= \frac{w_i{^2}}{T}(1 + \frac{\overline{z}_m^2}{\hat{\sigma}_{m}^2})
+\end{align*}
+Therefore \ref{2.3} becomes:
+\begin{align*}
+[RV(\beta_i)R']^{-\frac{1}{2}}R(\hat{\beta}_i-\beta_i) &= \frac{R(\hat{\beta}_i-\beta_i)}{w_i\sqrt{\frac{(1 + \frac{\overline{z}_m^2}{\hat{\sigma}_{m}^2})}{T}}} \\
+&= \frac{\hat{\alpha}_i - \alpha|H_0}{w_i\sqrt{\frac{(1 + \frac{\overline{z}_m^2}{\hat{\sigma}_{m}^2})}{T}}} \\
+&= \frac{\hat{\alpha}_i}{w_i\sqrt{\frac{(1 + \frac{\overline{z}_m^2}{\hat{\sigma}_{m}^2})}{T}}}
+\end{align*}
+Eventually by using the unbiased estimator for $w_i^2$, as mentioned at the beginning of this proof, we derive\footnote{$I_m$ is the scalar 1, hence $N(0,I_m) = N(0,1)$.}: 
+\begin{align}
+\frac{\hat{\alpha}_i}{\hat{w}_i\sqrt{\frac{(1 + \frac{\overline{z}_m^2}{\hat{\sigma}_{m}^2})}{T}}} \overset{d}{\to} N(0,1)
+\end{align}
+
+\section{Exercise 3: Pricing errors in FM}
+	\subsection{Set-up and Definitions}
+	\begin{itemize}
+		\item The data generating process (DGP) for the returns in excess of the risk-free rate with $\MakeUppercase\kappa$ tradable factors is: 
+			\begin{align} \label{cross-sectional}
+				r_{t} &= \MakeUppercase\beta f_t + u_t \quad t = 1,...,T 
+			\end{align} \vspace{-1.75em} 
+			\item $r_t$ is the (N x 1) vector containing the excess return of each security at time $t$: $r_{i,t}$ for i = 1,...,N, with N corresponding to the total number of securities available in the investable universe.   
+			\item $u_t$ is the (N x 1) vector containing the errors of the DGP and is assumed: $\overset{iid}{\sim} \: (0,\Omega)$ over $t$ with finite matrix $\Omega$. 
+			\item $\MakeUppercase\beta$ is the (N x K)\footnote{N is deemed to be larger than K.} matrix reporting on each line the factor loadings for i = 1,...,N\footnote{We are including the vector of ones: $i_N = [1,1,...,1]'$ as the first column of $\MakeUppercase\beta$ in order to add the intercept to the DGP introduced above.}.
+			\subitem Rank($\MakeUppercase\beta$) = K therefore, the inverse of $\MakeUppercase\beta'\MakeUppercase\beta$ exists and is definite positive. 
+			\item $f_t$ is the (K x 1) vector of the excess returns of the tradable risk factors in t, distributed as per $\overset{iid}{\sim} \: (\lambda,\Omega_{f})$ over $t$. $\lambda$ represents the (K x 1) vector of the true risk premia: $E(f_t) = \lambda$.\footnote{As we are including the intercept in the DGP and $r_{t}$ is the vector of the excess returns, we would expect $\lambda_{1,t}$ to be equal to 0.}
+			\item $u_s$ is independent from $f_t \; \forall(s,t)$ hence, $E[u_{s}f_t] = 0$ (hypothesis of strict exogeneity of the regressors).
+			\item We assume that the true factor loadings are known, hence we dont face a problem of error in variables (EIV) for this DPG\footnote{If $\MakeUppercase\beta$ had not been known, we would have estimated the vector from the N timeseries regressions covering the entire sample of lenght: $T$.}.
+			\item $\hat{\lambda}$ is estimated via OLS and corresponds to: $(\beta'\beta)^{-1}\beta'r_t$.
+			\end{itemize}
+	\subsection{Part 1: Demonstrate that $\hat{\epsilon} \overset{p}{\to} 0$ as $T\to{+\infty}$ }
+	Given the OLS formula for the pricing errors of \ref{cross-sectional} is $\hat{\epsilon}_t = r_t - \beta\hat{\lambda}_t$ and replacing $\hat{\lambda}$ with the corresponding OLS result, we find that $\hat{\epsilon}_t = r_t - \beta(\beta'\beta)^{-1}\beta'r_t = M_{\beta}r_t$\footnote{$M_{\beta}$ corresponds to $I_N - \beta(\beta'\beta)^{-1}\beta$ which is symmetric and idempotent ($I_N$ is the identity matrix (N x N)).}.\\
+	Therefore we observe that:
+	\begin{align} \label{3.1.a}
+				\hat{\epsilon} &= \frac{1}{T}\sum_{t=1}^{T}\epsilon_t = \frac{1}{T}\sum_{t=1}^{T}M_br_t
+	\end{align}
+	Looking at \ref{3.1.a} and replacing $r_t$ with \ref{cross-sectional}, we derive:
+\begin{align} \label{3.1.b}
+				\hat{\epsilon} &=\frac{1}{T}\sum_{t=1}^{T}M_br_t \notag \\ \notag
+				&= \frac{1}{T}\sum_{t=1}^{T}M_b(\MakeUppercase\beta f_t + u_t) \\ 
+				&= \frac{1}{T}\sum_{t=1}^{T}M_b(\MakeUppercase\beta f_t) + \frac{1}{T}\sum_{t=1}^{T}M_bu_t
+\end{align}
+The first component of \ref{3.1.b} is equal to 0 as it becomes: $\frac{1}{T}\sum_{t=1}^{T}(\MakeUppercase\beta f_t-\MakeUppercase\beta f_t)$, while for the second term we see:
+\begin{align*} 
+				\hat{\epsilon} &=\frac{1}{T}\sum_{t=1}^{T}M_bu_t \\
+				&= M_b(\frac{1}{T}\sum_{t=1}^{T}u_t)
+\end{align*}
+As $u_t \overset{iid}{\sim} \: (0,\Omega)$ and $\Omega$ is finite, we can apply the Law of Large Numbers (LLN) and obtain that $(\frac{1}{T}\sum_{t=1}^{T}u_t) \overset{p}{\to} 0$, it follows that: $\hat{\epsilon} \overset{p}{\to} 0$.
+\subsection{Part 2: Demonstrate that $\frac{1}{T}\sum_{t=1}^{T}(\hat{\epsilon}_t-\hat{\epsilon})(\hat{\epsilon}_t-\hat{\epsilon})' \overset{p}{\to} M_\beta\Omega M_\beta$ as $T\to{+\infty}$} 
+Following the same setup and results of 1.2 and recalling that $(M_\beta)' = M_\beta$, we derive that:
+\begin{align} \label{3.1.c}
+\frac{1}{T}\sum_{t=1}^{T}(\hat{\epsilon}_t-\hat{\epsilon})(\hat{\epsilon}_t-\hat{\epsilon})' &= \frac{1}{T}\sum_{t=1}^{T}(M_\beta r_t)(M_\beta r_t)' \notag\\
+&= \frac{1}{T}\sum_{t=1}^{T} M_\beta(\beta f_t + u_t)(\beta f_t + u_t)'M_\beta \notag\\
+&= \frac{1}{T}\sum_{t=1}^{T}M_\beta (\beta f_t f_t' \beta' + u_t u_t' + 2\beta f_t u_t') M_\beta  
+\end{align} 
+Additionally, we can decompose \ref{3.1.c} into the following components:
+ \begin{itemize}
+ \item $\frac{1}{T}\sum_{t=1}^{T}M_\beta(\beta f_t f_t' \beta') M_\beta = \frac{1}{T}\sum_{t=1}^{T}(\beta f_t f_t' \beta' - \beta f_t f_t' \beta')M_\beta = 0$ 
+ \item $\frac{1}{T}\sum_{t=1}^{T}M_\beta(2\beta f_t u_t')M_\beta = \frac{2}{T}\sum_{t=1}^{T}(\beta f_t u_t'-\beta f_t u_t')M_\beta = 0$
+ \item $\frac{1}{T}\sum_{t=1}^{T}M_\beta u_t u_t' M_\beta$
+ \end{itemize}
+ Assuming: i) the fourth moment of $u_t$ exists and is finite and ii) recalling that $u_t \overset{iid}{\sim} \: (0,\Omega)$, we can apply the LLN on $\frac{1}{T}\sum_{t=1}^{T} u_t u_t'$ and observe that this quantity $\overset{p}{\to} \Omega$.
+ It follows that the last member of \ref{3.1.c} $\overset{p}{\to} M_\beta \Omega M_\beta$, therefore:
+\begin{align} \label{3.2.b}
+\frac{1}{T}\sum_{t=1}^{T}(\hat{\epsilon_t}-\hat{\epsilon})(\hat{\epsilon_t}-\hat{\epsilon})' \overset{p}{\to} M_\beta \Omega M_\beta \\ \notag 
+\end{align}    
+\end{document}
