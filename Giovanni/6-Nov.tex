@@ -171,7 +171,8 @@ Eventually by using the unbiased estimator for $w_i^2$, as mentioned at the begi
 			\item We assume that the true factor loadings are known, hence we dont face a problem of error in variables (EIV) for this DPG\footnote{If $\MakeUppercase\beta$ had not been known, we would have estimated the vector from the N timeseries regressions covering the entire sample of lenght: $T$.}.
 			\item $\hat{\lambda}$ is estimated via OLS and corresponds to: $(\beta'\beta)^{-1}\beta'r_t$.
 			\end{itemize}
-	\subsection{Part 1: Demonstrate that $\hat{\epsilon} \overset{p}{\to} 0$ as $T\to{+\infty}$ }
+	\subsection{Part 1 }
+	Demonstrate that $\hat{\epsilon} \overset{p}{\to} 0$ as $T\to{+\infty}$
 	Given the OLS formula for the pricing errors of \ref{cross-sectional} is $\hat{\epsilon}_t = r_t - \beta\hat{\lambda}_t$ and replacing $\hat{\lambda}$ with the corresponding OLS result, we find that $\hat{\epsilon}_t = r_t - \beta(\beta'\beta)^{-1}\beta'r_t = M_{\beta}r_t$\footnote{$M_{\beta}$ corresponds to $I_N - \beta(\beta'\beta)^{-1}\beta$ which is symmetric and idempotent ($I_N$ is the identity matrix (N x N)).}.\\
 	Therefore we observe that:
 	\begin{align} \label{3.1.a}
