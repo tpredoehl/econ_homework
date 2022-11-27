@@ -28,20 +28,23 @@ independent_AR_simulation<- function(phi_vec, c_vec, sigma_u_vec, T){
   # c_vec   = [c_1, ..., c_N] = constant in AR process
   # number of AR(1) processes to simulate
   N <- length(phi_vec) 
-  
+  # T = T[6]
   # create empty matrix T X N that will contain all simulated AR processes
   AR_sim_mat <- NA*matrix(0,T+1,N) # empty vector ( (T+1) X 1 )
    u_sim_mat <- NA*matrix(0,T+1,N) # empty vector ( (T+1) X 1 )
   
   # loop over each AR process ind1
   for (ind1 in seq(1,N)) {
-    #ind1 = 1
+    # ind1 <- 1
     c       <-       c_vec[ind1]
     phi     <-     phi_vec[ind1]
     sigma_u <- sigma_u_vec[ind1]
-
+    
     # simulate vector of innovations zero mean, and sd given as input
-    # set.seed(10000+ind1) # fix "seed" in order to produce same random numbers every time next line of code is called!
+    # fix "seed" in order to produce same random numbers every time next line of code is called!
+    # reference: https://stackoverflow.com/questions/13605271/reasons-for-using-the-set-seed-function
+    as.numeric(Sys.time())-> t; set.seed((t - floor(t)) * 1e8 -> seed) 
+    
     u    <- rnorm(n = T+1, mean = 0, sd = sigma_u) #WN
     u_sim_mat[,ind1] <- u
 
@@ -56,7 +59,12 @@ independent_AR_simulation<- function(phi_vec, c_vec, sigma_u_vec, T){
     # simulate all other observations t=2 to T+1
     for (t in seq(2,T+1)) AR_sim_mat[t,ind1] <- phi*AR_sim_mat[t-1,ind1] + u[t]
   }
-
+   # cut the first row from the data
+   # length(AR_sim_mat); nrow(AR_sim_mat)
+   # length(u_sim_mat); nrow(u_sim_mat)
+   AR_sim_mat <- AR_sim_mat[-1,]
+   u_sim_mat <- u_sim_mat[-1,]
+   
   # Output of function
   # 1 = simulated AR process
   # 2 = simulated innovations

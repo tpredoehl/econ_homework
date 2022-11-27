@@ -1,113 +1,3 @@
----
-title: "Question 4"
-output:
-  pdf_document:
-    extra_dependencies: ["subcaption", "dcolumn"]
-  html_notebook: default
----
-```{r message=FALSE, warning=FALSE, include=FALSE}
-library(tidyverse)
-library(ggplot2)
-library(dplyr)
-library(broom)
-library(magrittr)
-library(frenchdata)
-# load FF10 data from .Rda file
-# load(file = "ff10_sample_1927_2022.Rda") # supplies ff_temp
-# alternative load from FF website using FF package
-ff_factors <- download_french_data('Fama/French 3 Factors')
-ff_factors_monthly <- ff_factors$subsets$data[[1]]
-names(ff_factors_monthly)[2] <- "Rm"
-
-ff_size <- download_french_data('Portfolios Formed on Size')
-targetSubset <- which(ff_size$subsets$name == "Value Weight Returns -- Monthly")
-ff_10_size_monthly_vw <- ff_size$subsets$data[[targetSubset]]
-names(ff_10_size_monthly_vw) <- gsub(pattern = " ", replacement = ".", x = names(ff_10_size_monthly_vw))
-# # join data sets
-decileCols <- c("Lo.10", "Dec.2","Dec.3", "Dec.4", "Dec.5", "Dec.6", "Dec.7", "Dec.8", "Dec.9", "Hi.10")
-#decileCols <- c("Lo 10", "Dec 2","Dec 3", "Dec 4", "Dec 5", "Dec 6", "Dec 7", "Dec 8", "Dec 9", "Hi 10")
-ff_raw <- left_join(x = ff_10_size_monthly_vw, y = ff_factors_monthly, by = "date") %>% filter(date > 192601 & date < 199901)
-```
-
-\section{(a)[3points] CS Regression}
-\subsection{Replication of Cochrane, 2009}
-Write  the  R  code  to  replicate  Figures  15.1  and  15.2  in  Cochrane, 2009.  Note  that  these  figures  use monthly  data  from  1926  to 1998.  Display  the two  figures you have produced with your R code.
-
-\begin{figure}
-\centering
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=1\linewidth]{Cochrane_15_1.png}
-  \caption{A subfigure}
-  \label{fig:sub1}
-\end{subfigure}%
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=1\linewidth]{Cochrane_15_2.png}
-  \caption{A subfigure}
-  \label{fig:sub2}
-\end{subfigure}
-\caption{A figure with two subfigures}
-\label{fig:test}
-\end{figure}
-
-Replication of 15.1 time series regression $E(R^e) = \beta E(R^{em})$. Set-up of regression analysis:
-\begin{itemize}
-  \item download value weighted, size sorted portfolio returns and factors, join tables
-  \item filter data on 1926-1998 time frame
-  \item for each decile calculate excess return $R_d^e = R_{i,t} - R_{f,t}$
-  \item for each decile, regress $E[R_d^e] = \beta_d E[R^{me}]$
-  \item plot $E[R_d^e]$ on $\beta_d$
-\end{itemize}
-
-```{r TS_reg, echo=FALSE, message=FALSE, warning=FALSE, fig.show="hold", out.width="50%"}
-#########################################################################################
-# multivariate linear regression model, using nested tidyr function
-
-minusRF <- function(x) x-ff_raw$RF
-
-ff_OLS <- ff_raw %>%
-  select(all_of(decileCols), Rm) %>% 
-  mutate_at(decileCols, minusRF) %>% 
-  pivot_longer(cols = all_of(decileCols), names_to = "Decile", values_to = "Re") %>% 
-  select(Decile, Re, Rm) %>% 
-  nest(data = -Decile) %>% 
-  mutate(
-    ols = map(data, ~ lm(Re ~ Rm - 1, data = .x)), # run ols regression without intercept
-    RE  = map(data, ~ mean(.x$Re)),                # extract E[Re_i]
-    RM  = map(data, ~ mean(.x$Rm)),                # extract E[Rm]
-    tidied = map(ols, tidy)
-  ) %>% 
-  unnest(c(tidied, RE, RM))
-
-Rm <- ff_OLS$RM[1]
-
-# plotting
-plot_15_1 <- ggplot(ff_OLS, aes(x=estimate, y=RE))+
-  scale_x_continuous(limits = c(0,1.5))+
-  scale_y_continuous(limits = c(0,1.5))+
-  geom_point()+
-  geom_point(aes(x=1, y=RM), color="red")+
-  geom_abline(intercept = 0, slope = Rm, linetype = "dashed", fullrange = TRUE) +
-  geom_smooth(method = lm, formula = y ~ x - 1, fullrange = TRUE, se = FALSE) +
-  xlab("betas") + 
-  ylab("Mean mothly return %")
-
-plot_15_1
-
-```
-\newpage
-
-The expected excess return-beta is fit precisely on two points $(\beta, R^e)$, the market return $(1, R^{me})$ and the risk-free rate $(0, 0)$. It is observed that the smallest size-decile exhibits the largest mean monthly excess return as well as estimated $\beta$. The positive pricing error of the TS regression, i.e. the distance between the expected and observed mean monthly excess returns is largest for the smallest size-decile, but smaller than in the original Cochrane figures. The reason for this is unclear, but may be related to adjustments applied on the dataset by French after 2009, or related to data adjustments that were adopted by French but not by Cochrane or vice versa.
-
-\subsection{What do these figures tell us about the CAPM?}
-The largest pricing error in the TS regression occur in the smallest size-decile. This is the the small firm anomaly or size premium and is considered a failure of the CAPM. Numerous attempts were made to explain this anomaly: Banz (1981) suggests that small firms face larger cost of capital than large firms which may explain an incentive to merge and form conglomerates. The size effect has been reproduced for numerous sample periods and for most major securities markets around the world (Hawawini and Keim, 2000). However, it tends to be weaker internationally, e.g., Crain (2011) and Bryan (2014). A number of sub-effects have been noted, such as the January-effect, whereby the size premium is observed particularly in the first trading days of the year and is largely absent the rest of the year Reinganum (1981), Roll (1981), Keim (1983), Gu (2003), Easterday, Sen, and Stephan (2009). Additonally, the size effect appears to have weakened significantly since it was first detected in the early 1980s e.g., Dichev (1998), Chan, Karceski, and Lakonishok (2000), Horowitz, Loughran and Savin (2000), Amihud (2002), Schwert (2003) and Van Dijk (2011). The size effect appears to be driven by "extreme" stocks. Removing stocks with less than USD 5m in market cap or alternatively the smallest 5% of firms causes the small firm effect to vanish e.g., Horowitz, Loughran, and Savin (2000), Crain (2011) and Bryan (2014). Additionally, Crain (2011) suggests that size may be a proxy for liquidity. Controlling for firm quality, a robust size effect emerges according to "Size Matters, If You Control Your Junk" by Assness, Frazzini, Israel, Mosksowitz, and Pedersen (2015). Quality stocks are safe, profitable, growing, and well managed. Quality is measured using the Quality Minus Junk (QMJ) factor proposed by Asness, Frazzini, and Pedersen (2014).
-
-The extensive research on the size premium undertaken after Cochrane produced the graphs 15.1 and 15.2 in 2009 may explain why the French dataset may control for some of the listed effects.
-
-\section{(b)[3points] Shanken Correction}
-\subsection{replicate the first 3 columns in Table 15.1, and the first 4 columns of Table  15.2 of  Cochrane  (2005,  book)}
-```{r echo=FALSE, message=FALSE, warning=FALSE}
 #######################################################################
 ###
 ### SETUP
@@ -282,5 +172,34 @@ K = 2
     ) %>% 
     select(Title, TS, OLS, GLS)
   tbl_15_1
+  
+  
+  
+  vcov(OLS_model, type = "const")
+  u <- OLS_model$residuals
+  cov(u)                                                                  # Zeileis (3): Vu <- (diag(1,T)-X%*%solve(t(X)%*%X)%*%t(X))%*%r_it, 
+  sig2_hat_u <- 1/(N-1) * sum(diag(u)^2)
+  phi <- sig2_hat_u*solve(t(X)%*%X)
+  
+  
+  data("Investment")  
+  fm.inv <- lm(RealInv ~ RealGNP + RealInt, data = Investment)
+  summary(fm.inv)
+  u <- fm.inv$residuals
+  u%*%t(u)
+  X <- as.matrix(cbind(1, as.numeric(Investment[,"RealGNP"]), as.numeric(Investment[,"RealInt"])))[-1,]
+  n <- nrow(X)
+  y_hat <- as.numeric(Investment[,"RealGNP"])[-1]
+  Mx <- diag(n) - X%*%solve(t(X)%*%X)%*%t(X)
+  u_hat <- Mx%*%y_hat
+  sig2_hat_u <- 1/(n-3) * sum(u_hat^2)
+  omega <- sig2_hat_u*diag(n)
+  sig_hat <- sqrt(sig2_hat_u)
+  phi_hat <- sig_hat*solve(t(X)%*%X)
 
-`````
+  vcovHC(fm.inv, type = "const", sandwich = FALSE)
+
+  
+  
+    NeweyWest(fm.inv, lag = 4, prewhite = FALSE)
+  sqrt(0.0004229789)
