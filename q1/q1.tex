@@ -121,13 +121,14 @@ The results obtained are different from what we previously expected. Indeed, by 
 Issues with these regressions:
 \begin{itemize}
 	\item The bias of $\beta_2$ does not converge asymptotically in probability. 
-	\subitem For $\hat{\beta}$ to converge to $\beta_0$ asymptotically, the bias $(\hat{\beta} - \beta_0)$ must be $O_p(1)$: \begin{align*}
-		(\hat{\beta} - \beta_0) &= (X'X)^{-1}X'u, with\\
-		(X'X)^{-1} &\in O_p(n^{-1}) and \\
-		X'u &\in O_p(n^{.5}). consequently:\\
-		n^{.5}(\hat{\beta} - \beta_0) &= n^{.5}(X'X)^{-1}X'u = n^{.5} O_p(n^{-1})O_p(n^{.5}) = O_p(1)
-	\end{align*}
-	The relevant assumption to be tested is therefore is $(X'X) \in n^{.5} O_p(n^{-1})$.
+	\subitem For $\hat{\beta}$ to converge to $\beta_0$ asymptotically, the bias $(\hat{\beta} - \beta_0)$ must be $O_p(1)$: 
+		\begin{align*}
+			(\hat{\beta} - \beta_0) &= (X'X)^{-1}X'u, with\\
+			(X'X)^{-1} &\in O_p(n^{-1}) and \\
+			X'u &\in O_p(n^{.5}). consequently:\\
+			n^{.5}(\hat{\beta} - \beta_0) &= n^{.5}(X'X)^{-1}X'u = n^{.5} O_p(n^{-1})O_p(n^{.5}) = O_p(1)
+		\end{align*}
+	\subitem The relevant assumption to be tested is therefore is $(X'X) \in n^{.5} O_p(n^{-1})$.
 	The random walk (14.01) is I(1), due to: \begin{align*}
 		w_t &= w_{t-1}+\epsilon_t \\
 		w_t - w_{t-1} &= \epsilon_t \\
