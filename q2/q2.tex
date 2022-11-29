@@ -157,6 +157,40 @@ Eventually, we conclude this demonstration by expanding showing that $\hat{\beta
 	\sim N(\begin{bmatrix} \alpha_i \\ \beta_{im} \end{bmatrix}, \frac{w_i^2}{T}\begin{bmatrix} (1 + \frac{\overline{z}_m^2}{\hat{\sigma}_{m}^2}) & \frac{-\overline{z}_m}{\hat{\sigma}_{m}^2} \\ \frac{-\overline{z}_m}{\hat{\sigma}_{m}^2} & \frac{1}{\hat{\sigma}_{m}^2} \end{bmatrix}) 
 \end{align}
 
+\subsection{(iii) demonstrate the t-test for $H_0: \alpha_i=0$}
+We add below a few considerations additional to what presented in \textit{Set-up and Definitions} to support this proof:
+\begin{itemize}
+	\item We are studying the asymptotic distribution of this test under $T \to +\infty$\footnote{Indeed, no distribution is provided for the errors in \ref{timeseries}.}.	
+	\item This is a linear hypothesis test, with $m = 1$ linear restrictions tested\footnote{The only restriction we are imposing on $\beta_i$ is: $\alpha_i = 0 $.}.
+	\item The generic matrix R (m x K), formalizing the linear restrictions on $\beta$, corresponds to the vector $\begin{bmatrix} 1 & 0 \end{bmatrix}$.
+	\item The generic vector q (m x 1) represents the restricted values imposed on $\beta$. As we are imposing only one restriction, q corresponds to a scalar metric: 0.
+	\item As we don't know the actual variance of $u_i|z_{mt}$ but we estimate the corresponding OLS residuals, we utilize $\frac{1}{T}\sum_{t=1}^{T}\hat{u}_{it}^2$ as an asymptotically unbiased estimator by applying the LLN\footnote{$\overline{u}_i = 0$ because of the inclusion of the intercept in $X$.}.
+\end{itemize}
+Under the null hypothesis $H_0$: $R\beta_i=q$:
+\begin{align*}
+	R\hat{\beta_i}-q = R(\hat{\beta_i} - \beta_i)
+\end{align*}
+Furthermore, as proved in the previous exercise and by applying the properties of the multivariate Gaussian distribution, we derive:
+\begin{align} \label{2.3}
+	R(\hat{\beta}_i-\beta_i) &\sim N(0, RV(\beta_i)R') \notag \\
+	[RV(\beta_i)R']^{-\frac{1}{2}}R(\hat{\beta}_i-\beta_i) &\overset{d}{\to} N(0,I_m)
+\end{align}
+By substituting for $R=\begin{bmatrix} 1 & 0 \end{bmatrix}$ in $RV(\beta_i)R'$ and rearranging the terms:
+\begin{align*}
+	RV(\beta_i)R' &= \frac{w_i{^2}}{T} \begin{bmatrix} 1 & 0 \end{bmatrix} \begin{bmatrix} (1 + \frac{\overline{z}_m^2}{\hat{\sigma}_{m}^2}) & \frac{-\overline{z}_m}{\hat{\sigma}_{m}^2} \\ \frac{-\overline{z}_m}{\hat{\sigma}_{m}^2} & \frac{1}{\hat{\sigma}_{m}^2} \end{bmatrix} \begin{bmatrix} 1 \\ 0 \end{bmatrix} \\
+	&= \frac{w_i{^2}}{T}(1 + \frac{\overline{z}_m^2}{\hat{\sigma}_{m}^2})
+\end{align*}
+Therefore \ref{2.3} becomes:
+\begin{align*}
+	[RV(\beta_i)R']^{-\frac{1}{2}}R(\hat{\beta}_i-\beta_i) &= \frac{R(\hat{\beta}_i-\beta_i)}{w_i\sqrt{\frac{(1 + \frac{\overline{z}_m^2}{\hat{\sigma}_{m}^2})}{T}}} \\
+	&= \frac{\hat{\alpha}_i - \alpha|H_0}{w_i\sqrt{\frac{(1 + \frac{\overline{z}_m^2}{\hat{\sigma}_{m}^2})}{T}}} \\
+	&= \frac{\hat{\alpha}_i}{w_i\sqrt{\frac{(1 + \frac{\overline{z}_m^2}{\hat{\sigma}_{m}^2})}{T}}}
+\end{align*}
+Eventually by using the unbiased estimator for $w_i^2$, as mentioned at the beginning of this proof, we derive\footnote{$I_m$ is the scalar 1, hence $N(0,I_m) = N(0,1)$.}: 
+\begin{align}
+	\frac{\hat{\alpha}_i}{\hat{w}_i\sqrt{\frac{(1 + \frac{\overline{z}_m^2}{\hat{\sigma}_{m}^2})}{T}}} \overset{d}{\to} N(0,1)
+\end{align}
+
 \section{Giovannis original text}
 \subsection{Set-up and Definitions}
 \begin{itemize}
