@@ -152,10 +152,10 @@ Simplifying the variance term of the distribution of $\hat{\beta_i}$:
 	\begin{bmatrix} (1 + \frac{\overline{z}_m^2}{\hat{\sigma}_{m}^2}) & \frac{-\overline{z}_m}{\hat{\sigma}_{m}^2} \\ \frac{-\overline{z}_m}{\hat{\sigma}_{m}^2} & \frac{1}{\hat{\sigma}_{m}^2} \end{bmatrix}   
 \end{align*}
 Eventually, we conclude this demonstration by expanding showing that $\hat{\beta}_i \overset{d}{\to} N(\beta_i,V(\hat{\beta_i}))$:
-\begin{align}
+\begin{align*}
 	\begin{bmatrix} \hat{\alpha}_i \\ \hat{\beta}_{im} \end{bmatrix}
 	\sim N(\begin{bmatrix} \alpha_i \\ \beta_{im} \end{bmatrix}, \frac{w_i^2}{T}\begin{bmatrix} (1 + \frac{\overline{z}_m^2}{\hat{\sigma}_{m}^2}) & \frac{-\overline{z}_m}{\hat{\sigma}_{m}^2} \\ \frac{-\overline{z}_m}{\hat{\sigma}_{m}^2} & \frac{1}{\hat{\sigma}_{m}^2} \end{bmatrix}) 
-\end{align}
+\end{align*}
 
 \subsection{(iii) demonstrate the t-test for $H_0: \alpha_i=0$}
 We add below a few considerations additional to what presented in \textit{Set-up and Definitions} to support this proof:
@@ -171,10 +171,10 @@ Under the null hypothesis $H_0$: $R\beta_i=q$:
 	R\hat{\beta_i}-q = R(\hat{\beta_i} - \beta_i)
 \end{align*}
 Furthermore, as proved in the previous exercise and by applying the properties of the multivariate Gaussian distribution, we derive:
-\begin{align*}
+\begin{align}
 	R(\hat{\beta}_i-\beta_i) &\sim N(0, RV(\beta_i)R') \notag \\
 	[RV(\beta_i)R']^{-\frac{1}{2}}R(\hat{\beta}_i-\beta_i) &\overset{d}{\to} N(0,I_m)
-\end{align*}
+\end{align}
 By substituting for $R=\begin{bmatrix} 1 & 0 \end{bmatrix}$ in $RV(\beta_i)R'$ and rearranging the terms:
 \begin{align*}
 	RV(\beta_i)R' &= \frac{w_i{^2}}{T} \begin{bmatrix} 1 & 0 \end{bmatrix} \begin{bmatrix} (1 + \frac{\overline{z}_m^2}{\hat{\sigma}_{m}^2}) & \frac{-\overline{z}_m}{\hat{\sigma}_{m}^2} \\ \frac{-\overline{z}_m}{\hat{\sigma}_{m}^2} & \frac{1}{\hat{\sigma}_{m}^2} \end{bmatrix} \begin{bmatrix} 1 \\ 0 \end{bmatrix} \\
