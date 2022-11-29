@@ -50,6 +50,84 @@
 	\item $z_{mt}$ corresponds to the excess return of the market index (used as proxy of the market portfolio) at time t. 
 \end{itemize}
 
+\subsection{(i) Estimate $\hat{\alpha_i}$ and $\hat{\beta_i}$}
+\highlightTP{would you agree if we provide the sum-based solution as an alternative in the annex ? I cant help but finding the matrix solution a lot cleaner.}
+NOTE : $\hat{\alpha_i}$ is the Jensen’s alpha, and represents an estimate of the expected return not justified by its exposure to market risk, the only one that matters according to the CAPM.
+
+\begin{align*}
+	x_t &= (1, z_{mt}') \\
+	X &= [x_1, ..., x_T]' \\
+	X'X &= T Sxx\\
+	Sxx &= \frac{1}{T}X'X = \left[\begin{array}{cc}
+		1 & \bar{z}_m \\
+		\bar{z}_m & \frac{1}{T}\sum{z_m^2}
+	\end{array}\right] \\	
+	Sxx^{-1} &= \left[\begin{array}{cc}
+		\frac{1}{T}\sum{z_m^2} & -\bar{z}_m \\
+		-\bar{z}_m & 1
+	\end{array}\right] = \left[\begin{array}{cc}
+		\frac{1}{T}\sum{z_m^2} - \bar{z}_m^2 + \bar{z}_m^2 & -\bar{z}_m \\
+		-\bar{z}_m & 1
+	\end{array}\right]\\
+	&= \left[\begin{array}{cc}
+		\hat{\sigma}_m^2 + \bar{z}_m^2 & -\bar{z}_m \\
+		-\bar{z}_m & 1
+	\end{array}\right] = \left[\begin{array}{cc}
+		1 + \frac{\bar{z}_m^2}{\hat{\sigma}_m^2} & \frac{-\bar{z}_m}{\hat{\sigma}_m^2} \\
+		\frac{-\bar{z}_m}{\hat{\sigma}_m^2} & \frac{1}{\hat{\sigma}^2}
+	\end{array}\right]\\
+	Sxz_i &= \frac{1}{T}X'z_i = \left[\begin{array}{c}
+		\bar{z}_i \\
+		\frac{1}{T}\sum{z_m z_i}
+	\end{array}\right] = \left[\begin{array}{c}
+		\bar{z}_i \\
+		\frac{1}{T}\sum{z_m z_i} - \bar{z}_m \bar{z}_i + \bar{z}_m \bar{z}_i
+	\end{array}\right] = \left[\begin{array}{c}
+		\bar{z}_i \\
+		\hat{\sigma}_{im} + \bar{z}_m \bar{z}_i 
+	\end{array}\right] \\
+\end{align*}
+
+Solving for $\hat{\alpha}_i$ and $\hat{\beta}_i$, given $\hat{\beta}=Sxx^{-1}Sxz_i$:
+\begin{align*}
+	TSxx \left[\begin{array}{c}
+		\hat{\alpha}_i \\
+		\hat{\beta}_i
+	\end{array}\right] & = TSxz_i\\
+	\left[\begin{array}{cc}
+		1 & \bar{z}_m \\
+		\bar{z}_m & \frac{1}{n}\sum{z_m^2}
+	\end{array}\right] \left[\begin{array}{c}
+		\hat{\alpha}_i \\
+		\hat{\beta}_i
+	\end{array}\right] &= \left[\begin{array}{c}
+		\bar{z}_i \\
+		\hat{\sigma}_{im} + \bar{z}_m \bar{z}_i 
+	\end{array}\right] \\	
+	\begin{array}{c}
+		(1) \\
+		(2)
+	\end{array}
+	\left[\begin{array}{c}
+		\hat{\alpha}_i + \hat{\beta}_i \bar{z}_m \\
+		\hat{\alpha}_i \bar{z}_m + \hat{\beta}_i \frac{1}{n}\sum{z_m^2}
+	\end{array}\right] &= \left[\begin{array}{c}
+		\bar{z}_i \\
+		\hat{\sigma}_{im} + \bar{z}_m \bar{z}_i 
+	\end{array}\right] \\
+\end{align*}
+
+From (1) follows directly: $\hat{\alpha}_i = \bar{z}_i - \hat{\beta}_i \bar{z}_m$. Inserting this into (2) yields:
+\begin{align*}
+	\hat{\alpha}_i \bar{z}_m + \hat{\beta}_i \frac{1}{n}\sum{z_m^2} &= \hat{\sigma}_{im} + \bar{z}_m \bar{z}_i \\
+	(\bar{z}_i - \hat{\beta}_i \bar{z}_m)\bar{z}_m + \hat{\beta}_i \frac{1}{n}\sum{z_m^2} &= \hat{\sigma}_{im} + \bar{z}_m \bar{z}_i \\
+	\bar{z}_i \bar{z}_m - \hat{\beta}_i \bar{z}_m^2 + \hat{\beta}_i \frac{1}{n}\sum{z_m^2} &= \hat{\sigma}_{im} + \bar{z}_m \bar{z}_i \\
+	- \hat{\beta}_i \bar{z}_m^2 + \hat{\beta}_i \frac{1}{n}\sum{z_m^2} &= \hat{\sigma}_{im}\\
+	\hat{\beta}_i  (\frac{1}{n}\sum{z_m^2}-\bar{z}_m^2) &= \hat{\sigma}_{im}\\
+	\hat{\beta}_i \hat{\sigma}_{m}^2 &= \hat{\sigma}_{im}\\
+	\hat{\beta}_i &=  \frac{\hat{\sigma}_{im}}{\hat{\sigma}_{m}^2}\\
+\end{align*}
+
 \section{Giovannis original text}
 \subsection{Set-up and Definitions}
 \begin{itemize}
