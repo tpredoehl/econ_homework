@@ -52,23 +52,26 @@
 		\end{align*}
 \end{itemize}
 
+\newpage
 \subsection*{1.a}
 \subsubsection*{(i) Compute for each sample size T the distribution of the $R^2$ of the MC simulations with either 7 separate histograms, or one unique figure where you report on the y-axis the 5\%, 10\% 25\%, 50\%, 75\%, 90\% and 95\% quantiles of the distributions of the simulated $R^2$, and on the x-axis you have T = 6, 12, 60, 120, 240, 360, 480.}
 
-$LRM_1$ spurious regression of random walks with $\phi=1$ should produce $R^2$ near 0 given that $beta_2$ is expected to be insignificant. The distribution of simulated $R^2$ however indicates that this is not the case for any length of timeseries. 
+$LRM_1$ spurious regression of random walks with $\phi=1$ should produce $R^2$ near 0 given that $\beta_2$ is expected to be insignificant. The distribution of simulated $R^2$ however indicates that this is not the case for any length of timeseries. 
 
 \begin{center}
 	\includegraphics[width=13.36cm, height=16.8cm]{"./1ai_chart"}
 \end{center}
 
+\newpage
 \subsubsection*{(ii) Similarly (either with histograms, or with one plot of the quantiles) report the distributions of the estimates t-statistics for the test of the null H0 : $\beta_2 = 0$}
 
-The dispersion of the t-statistic $t_{\beta} = \frac{\beta_2 - 0}{\sigma_{\beta_2}}$
+The dispersion of the t-statistic $t_{\beta_2} = \frac{\beta_2 - 0}{\sigma_{\beta_2}}$ around 0 increases with increasing length of the timeseries.
 
 \begin{center}
 	\includegraphics[width=13.36cm, height=16.8cm]{"./1aii_chart"}
 \end{center}
 
+\newpage
 \subsubsection*{(iii) Compute the empirical rejection frequencies (that is the empirical size of the tests), which is exactly the figure 14.1 in Davidson MacKinnon (2005, book).}
 
 \begin{center}
