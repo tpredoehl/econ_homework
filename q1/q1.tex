@@ -120,7 +120,8 @@ The results obtained are different from what we previously expected. Indeed, by 
 
 Issues with these regressions:
 \begin{itemize}
-	\item The bias of $\beta_2$ does not \commentTP{converge}{this bit is from Timo} asymptotically in probability. For $\hat{\beta}$ to converge to $\beta_0$ asymptotically, the bias $(\hat{\beta} - \beta_0)$ must be $O_p(1)$: \begin{align*}
+	\item The bias of $\beta_2$ does not converge asymptotically in probability. 
+	\subitem For $\hat{\beta}$ to converge to $\beta_0$ asymptotically, the bias $(\hat{\beta} - \beta_0)$ must be $O_p(1)$: \begin{align*}
 		(\hat{\beta} - \beta_0) &= (X'X)^{-1}X'u, with\\
 		(X'X)^{-1} &\in O_p(n^{-1}) and \\
 		X'u &\in O_p(n^{.5}). consequently:\\
