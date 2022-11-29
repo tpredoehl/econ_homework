@@ -13,10 +13,62 @@
 \section*{Question 3 : Pricing errors in FM (3 points),compulsory}
 Solve the exercise in slide n. 100 of Chapter 3 “SUR, GRS, CSR, Fama-MacBeth”. Note : the question in slide n. 100 of Chapter 3 has two sub-questions (i), (ii) : answer to both of them.\\
 
-For $T \rightarrow + \infty$
+\subsection{Set-up and Definitions}
+\begin{itemize}
+	\item The data generating process (DGP) for the returns in excess of the risk-free rate with $\MakeUppercase\kappa$ tradable factors is: 
+	\begin{align} \label{cross-sectional}
+		r_{t} &= \MakeUppercase\beta f_t + u_t \quad t = 1,...,T 
+	\end{align} \vspace{-1.75em} 
+	\item $r_t$ is the (N x 1) vector containing the excess return of each security at time $t$: $r_{i,t}$ for i = 1,...,N, with N corresponding to the total number of securities available in the investable universe.   
+	\item $u_t$ is the (N x 1) vector containing the errors of the DGP and is assumed: $\overset{iid}{\sim} \: (0,\Omega)$ over $t$ with finite matrix $\Omega$. 
+	\item $\MakeUppercase\beta$ is the (N x K)\footnote{N is deemed to be larger than K.} matrix reporting on each line the factor loadings for i = 1,...,N\footnote{We are including the vector of ones: $i_N = [1,1,...,1]'$ as the first column of $\MakeUppercase\beta$ in order to add the intercept to the DGP introduced above.}.
+	\subitem Rank($\MakeUppercase\beta$) = K therefore, the inverse of $\MakeUppercase\beta'\MakeUppercase\beta$ exists and is definite positive. 
+	\item $f_t$ is the (K x 1) vector of the excess returns of the tradable risk factors in t, distributed as per $\overset{iid}{\sim} \: (\lambda,\Omega_{f})$ over $t$. $\lambda$ represents the (K x 1) vector of the true risk premia: $E(f_t) = \lambda$.\footnote{As we are including the intercept in the DGP and $r_{t}$ is the vector of the excess returns, we would expect $\lambda_{1,t}$ to be equal to 0.}
+	\item $u_s$ is independent from $f_t \; \forall(s,t)$ hence, $E[u_{s}f_t] = 0$ (hypothesis of strict exogeneity of the regressors).
+	\item We assume that the true factor loadings are known, hence we dont face a problem of error in variables (EIV) for this DPG\footnote{If $\MakeUppercase\beta$ had not been known, we would have estimated the vector from the N timeseries regressions covering the entire sample of lenght: $T$.}.
+	\item $\hat{\lambda}$ is estimated via OLS and corresponds to: $(\beta'\beta)^{-1}\beta'r_t$.
+\end{itemize}
 
 \subsection*{(i) Show $\hat{\epsilon} \xrightarrow{p} 0$}
+Demonstrate that $\hat{\epsilon} \overset{p}{\to} 0$ as $T\to{+\infty}$ 
+Given the OLS formula for the pricing errors of \ref{cross-sectional} is $\hat{\epsilon}_t = r_t - \beta\hat{\lambda}_t$ and replacing $\hat{\lambda}$ with the corresponding OLS result, we find that $\hat{\epsilon}_t = r_t - \beta(\beta'\beta)^{-1}\beta'r_t = M_{\beta}r_t$\footnote{$M_{\beta}$ corresponds to $I_N - \beta(\beta'\beta)^{-1}\beta$ which is symmetric and idempotent ($I_N$ is the identity matrix (N x N)).}.\\
+Therefore we observe that:
+\begin{align} \label{3.1.a}
+	\hat{\epsilon} &= \frac{1}{T}\sum_{t=1}^{T}\epsilon_t = \frac{1}{T}\sum_{t=1}^{T}M_br_t
+\end{align}
+Looking at \ref{3.1.a} and replacing $r_t$ with \ref{cross-sectional}, we derive:
+\begin{align} \label{3.1.b}
+	\hat{\epsilon} &=\frac{1}{T}\sum_{t=1}^{T}M_br_t \notag \\ \notag
+	&= \frac{1}{T}\sum_{t=1}^{T}M_b(\MakeUppercase\beta f_t + u_t) \\ 
+	&= \frac{1}{T}\sum_{t=1}^{T}M_b(\MakeUppercase\beta f_t) + \frac{1}{T}\sum_{t=1}^{T}M_bu_t
+\end{align}
+The first component of \ref{3.1.b} is equal to 0 as it becomes: $\frac{1}{T}\sum_{t=1}^{T}(\MakeUppercase\beta f_t-\MakeUppercase\beta f_t)$, while for the second term we see:
+\begin{align*} 
+	\hat{\epsilon} &=\frac{1}{T}\sum_{t=1}^{T}M_bu_t \\
+	&= M_b(\frac{1}{T}\sum_{t=1}^{T}u_t)
+\end{align*}
+As $u_t \overset{iid}{\sim} \: (0,\Omega)$ and $\Omega$ is finite, we can apply the Law of Large Numbers (LLN) and obtain that $(\frac{1}{T}\sum_{t=1}^{T}u_t) \overset{p}{\to} 0$, it follows that: $\hat{\epsilon} \overset{p}{\to} 0$.
+
 
 \subsection*{(ii) Show $\frac{1}{T} \sum_{t=1}^{T} (\hat{\epsilon}_t - \hat{\epsilon})(\hat{\epsilon}_t - \hat{\epsilon})' \xrightarrow{p} M_{\beta} \Omega M_{\beta}$}
+Demonstrate that $\frac{1}{T}\sum_{t=1}^{T}(\hat{\epsilon}_t-\hat{\epsilon})(\hat{\epsilon}_t-\hat{\epsilon})' \overset{p}{\to} M_\beta\Omega M_\beta$ as $T\to{+\infty}$
+Following the same setup and results of 1.2 and recalling that $(M_\beta)' = M_\beta$, we derive that:
+\begin{align} \label{3.1.c}
+	\frac{1}{T}\sum_{t=1}^{T}(\hat{\epsilon}_t-\hat{\epsilon})(\hat{\epsilon}_t-\hat{\epsilon})' &= \frac{1}{T}\sum_{t=1}^{T}(M_\beta r_t)(M_\beta r_t)' \notag\\
+	&= \frac{1}{T}\sum_{t=1}^{T} M_\beta(\beta f_t + u_t)(\beta f_t + u_t)'M_\beta \notag\\
+	&= \frac{1}{T}\sum_{t=1}^{T}M_\beta (\beta f_t f_t' \beta' + u_t u_t' + 2\beta f_t u_t') M_\beta  
+\end{align} 
+Additionally, we can decompose \ref{3.1.c} into the following components:
+\begin{itemize}
+	\item $\frac{1}{T}\sum_{t=1}^{T}M_\beta(\beta f_t f_t' \beta') M_\beta = \frac{1}{T}\sum_{t=1}^{T}(\beta f_t f_t' \beta' - \beta f_t f_t' \beta')M_\beta = 0$ 
+	\item $\frac{1}{T}\sum_{t=1}^{T}M_\beta(2\beta f_t u_t')M_\beta = \frac{2}{T}\sum_{t=1}^{T}(\beta f_t u_t'-\beta f_t u_t')M_\beta = 0$
+	\item $\frac{1}{T}\sum_{t=1}^{T}M_\beta u_t u_t' M_\beta$
+\end{itemize}
+Assuming: i) the fourth moment of $u_t$ exists and is finite and ii) recalling that $u_t \overset{iid}{\sim} \: (0,\Omega)$, we can apply the LLN on $\frac{1}{T}\sum_{t=1}^{T} u_t u_t'$ and observe that this quantity $\overset{p}{\to} \Omega$.
+It follows that the last member of \ref{3.1.c} $\overset{p}{\to} M_\beta \Omega M_\beta$, therefore:
+\begin{align} \label{3.2.b}
+	\frac{1}{T}\sum_{t=1}^{T}(\hat{\epsilon_t}-\hat{\epsilon})(\hat{\epsilon_t}-\hat{\epsilon})' \overset{p}{\to} M_\beta \Omega M_\beta \\ \notag 
+\end{align}    
+
 
 \end{document}
