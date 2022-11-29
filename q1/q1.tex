@@ -90,7 +90,6 @@ The dispersion of the t-statistic $t_{\beta_2} = \frac{\beta_2 - 0}{\sigma_{\bet
 \newpage
 \subsection*{1b: Summarize the problems of spurious regressions in econometrics}
 
-\begin{multicols}{2}
 The results obtained are different from what we previously expected. Indeed, by looking at Figure 1.3, we can observe that:
 \begin{itemize}
 	\item Apart from DPG 4 whose $H_0$ rejection rate converges asymptotically to 5\%, the empirical rejection rate is structurally higher than the significance level for the three other processes.
@@ -122,7 +121,7 @@ The distortion for DPG 3 arises from the fact that neither the constant nor $x_t
 \end{align*}
 This intuition suggests that there is serial autocorrelation in the errors and the (asymptotic) solution to avoid too small standard errors in finite samples is to switch from the OLS VaR-Cov estimator to the Newey-West heteroskedasticity and autocorrelation consistent (HAC) one.
 
-\columnbreak
+
 
 The $H_0: \beta_2=0$ tested with the model (14.12) $$y_t = \beta_1 + \beta_2y_{t-1} + v_t$$ implies a DGP': $y_t = \beta_1 + v_t$, when $y_t$ is actually generated using DGP (14.01) $y_t = y_{t-1} + v_t, y_0=0, v_t \sim iidN(0,1)$.
 
@@ -152,7 +151,7 @@ Further, (14.01) reduces to $w_t = \sum^t_{s=1}{\epsilon_s}$, which enters as X'
 \end{align*}
 
 Consequently, given (14.01) being I(1), $X'X \in O_p(n^2)$ and therefore cannot possibly converge to a finite probability limit. The bias $(\hat{\beta} - \beta_0)$ therefore does not converge asymptotically in probability.
-\end{multicols}
+
 
 
 
