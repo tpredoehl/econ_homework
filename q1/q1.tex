@@ -62,7 +62,7 @@
 	\subitem \textbf{A.1: independent observations} $y_i, x_i$ are i.i.d, which is equivalent to $v_t|x$ and $v_t|y$ being i.i.d.
 	\subitem \textbf{A.2: regressors are uncorrelated with errors} $E[v_t x_t]=E[v_t y_t]=0$. This assumption is weaker than strict exogeneity and is not restricting the utilization of lagged values of the dependent variable into the regressors matrix.
 	\subitem \textbf{A.3 Identification} $Q= E[x_{t}x_{t}']$ exists, is positive definite and has rank corresponding to the total number of regressors (no regressor is a linear combination of the others).
-	\subitem \textbf{A.4: Finite Moments } $S = E[v_{t}^2x_{t}x_{t}']$ exists and is positive definite, with 
+	\subitem \textbf{A.4: Finite Moments } $S = E[v_{t}^2x_{t}x_{t}']$ \alert{exists} and is positive definite, with 
 		\begin{align*}
 			S &= E[v_{t}^2x_{t}x_{t}']\\
 			&= E[v_t^2]E[x_tx_t']+cov(v_t,x_t)\\
