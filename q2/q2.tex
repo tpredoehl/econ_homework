@@ -51,7 +51,7 @@
 \end{itemize}
 
 \subsection{(i) Estimate $\hat{\alpha_i}$ and $\hat{\beta_i}$}
-\highlightTP{would you agree if we provide the sum-based solution as an alternative in the annex ?}
+\highlightTP{would you agree if we provide the sum-based solution as an alternative in an annex ?}
 NOTE : $\hat{\alpha_i}$ is the Jensen’s alpha, and represents an estimate of the expected return not justified by its exposure to market risk, the only one that matters according to the CAPM.
 
 \begin{align*}
@@ -127,6 +127,42 @@ From (1) follows directly: $\hat{\alpha}_i = \bar{z}_i - \hat{\beta}_i \bar{z}_m
 	\hat{\beta}_i \hat{\sigma}_{m}^2 &= \hat{\sigma}_{im}\\
 	\hat{\beta}_i &=  \frac{\hat{\sigma}_{im}}{\hat{\sigma}_{m}^2}\\
 \end{align*}
+
+\subsection{(ii) demonstrate the asymptotic distribution of $\beta_i|z_{mt}$}
+As we are not assuming any specific form for $u_i|z_{mt}$, we will study the distribution of $\hat{\beta_i}|z_m$ asymptotically ($T \to \infty$). Therefore, by rearranging the definition of $\hat{\beta_i}$ we derive:  
+\begin{align*}
+	\hat{\beta_i} | z_{mt} &= (X'X)^{-1}X'r_i = \beta_i + (X'X)^{-1}X'u_i \\
+	\sqrt{T}(\hat{\beta_i} -\beta_i) &= \sqrt{T}(X'X)^{-1}X'u_i \\
+	&= (\frac{X'X}{T})^{-1}\sqrt{T}X'u_i 
+\end{align*}
+Further noting that (under $T \to +\infty$):
+\begin{itemize}
+	\item $(\frac{X'X}{T}) \overset{p}{\to} E[x_ix_i']$ due to the application of the Law of Large Numbers (LLN) because $[x_{it}]_{t=1}^T$ is a sequence of IID observations with finite expected value and variance. Additionally, by using the Slutsky's theorem we obtain: $(\frac{X'X}{T})^{-1} \overset{p}{\to} E[x_ix_i']^{-1}$. 	
+	\item $X'u_i \overset{d}{\to} X'N(0,w_i^2I_T)X$ due to the application of the Central Limit Theorem (CLT) in light of: i) IID observations, ii) errors uncorrelated with the regressors and iii) finite moments\footnote{As mentioned in the \textit{Set-up and Definitions} part of this exercise.}.
+\end{itemize}
+By applying the properties of the multivariate Normal distribution, we obtain:
+\begin{align*}
+	\hat{\beta_i} \overset{d}{\to} N(\beta_i, (X'X)^{-1}X'w_i^2I_TX(X'X)^{-1})
+\end{align*}
+Simplifying the variance term of the distribution of $\hat{\beta_i}$:
+\begin{align*}
+	V(\hat{\beta_i}) &= (X'X)^{-1}X'w_i^2I_TX(X'X)^{-1} \\
+	&= w_i^2 (X'X)^{-1}
+\end{align*}
+Additionally, we can rewrite \ref{(X'X)^-1} as per below:
+\begin{align} \label{X'X rearranged}
+	(X'X)^{-1} &=  \frac{1}{T^2\hat{\sigma}_{m}^2} 
+	\begin{bmatrix} (\sum_{t=1}^{T}z_{mt}^2) -T\overline{z}_m^2 + T\overline{z}_m^2 & -T\overline{z}_m \\ -T\overline{z}_m & T \end{bmatrix} \notag \\
+	&= 	\frac{1}{T^2\hat{\sigma}_{m}^2}
+	\begin{bmatrix} (T\hat{\sigma}_{m}^2 + T\overline{z}_m^2) & -T\overline{z}_m \\ -T\overline{z}_m & T \end{bmatrix} \notag \\
+	&=  \frac{1}{T} 
+	\begin{bmatrix} (1 + \frac{\overline{z}_m^2}{\hat{\sigma}_{m}^2}) & \frac{-\overline{z}_m}{\hat{\sigma}_{m}^2} \\ \frac{-\overline{z}_m}{\hat{\sigma}_{m}^2} & \frac{1}{\hat{\sigma}_{m}^2} \end{bmatrix}   
+\end{align}
+Eventually, we conclude this demonstration by expanding $\hat{\beta}_i$ into its components and by replacing \ref{X'X rearranged} into $\hat{\beta}_i \overset{d}{\to} N(\beta_i,V(\hat{\beta_i})$:
+\begin{align}
+	\begin{bmatrix} \hat{\alpha}_i \\ \hat{\beta}_{im} \end{bmatrix}
+	\sim N(\begin{bmatrix} \alpha_i \\ \beta_{im} \end{bmatrix}, \frac{w_i^2}{T}\begin{bmatrix} (1 + \frac{\overline{z}_m^2}{\hat{\sigma}_{m}^2}) & \frac{-\overline{z}_m}{\hat{\sigma}_{m}^2} \\ \frac{-\overline{z}_m}{\hat{\sigma}_{m}^2} & \frac{1}{\hat{\sigma}_{m}^2} \end{bmatrix}) 
+\end{align}
 
 \section{Giovannis original text}
 \subsection{Set-up and Definitions}
