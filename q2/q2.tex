@@ -171,7 +171,7 @@ Under the null hypothesis $H_0$: $R\beta_i=q$:
 	R\hat{\beta_i}-q = R(\hat{\beta_i} - \beta_i)
 \end{align*}
 Furthermore, as proved in the previous exercise and by applying the properties of the multivariate Gaussian distribution, we derive:
-\begin{align}
+\begin{align}\label{1}
 	R(\hat{\beta}_i-\beta_i) &\sim N(0, RV(\beta_i)R') \notag \\
 	[RV(\beta_i)R']^{-\frac{1}{2}}R(\hat{\beta}_i-\beta_i) &\overset{d}{\to} N(0,I_m)
 \end{align}
@@ -180,7 +180,7 @@ By substituting for $R=\begin{bmatrix} 1 & 0 \end{bmatrix}$ in $RV(\beta_i)R'$ a
 	RV(\beta_i)R' &= \frac{w_i{^2}}{T} \begin{bmatrix} 1 & 0 \end{bmatrix} \begin{bmatrix} (1 + \frac{\overline{z}_m^2}{\hat{\sigma}_{m}^2}) & \frac{-\overline{z}_m}{\hat{\sigma}_{m}^2} \\ \frac{-\overline{z}_m}{\hat{\sigma}_{m}^2} & \frac{1}{\hat{\sigma}_{m}^2} \end{bmatrix} \begin{bmatrix} 1 \\ 0 \end{bmatrix} \\
 	&= \frac{w_i{^2}}{T}(1 + \frac{\overline{z}_m^2}{\hat{\sigma}_{m}^2})
 \end{align*}
-And therefore (2) becomes:
+And therefore (\ref{1}) becomes:
 \begin{align*}
 	[RV(\beta_i)R']^{-\frac{1}{2}}R(\hat{\beta}_i-\beta_i) &= \frac{R(\hat{\beta}_i-\beta_i)}{w_i\sqrt{\frac{(1 + \frac{\overline{z}_m^2}{\hat{\sigma}_{m}^2})}{T}}} \\
 	&= \frac{\hat{\alpha}_i - \alpha|H_0}{w_i\sqrt{\frac{(1 + \frac{\overline{z}_m^2}{\hat{\sigma}_{m}^2})}{T}}} \\
