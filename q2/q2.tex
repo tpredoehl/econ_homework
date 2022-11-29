@@ -1,0 +1,283 @@
+\documentclass[]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+%opening
+\title{}
+\author{}
+
+\begin{document}
+
+\maketitle
+
+\section*{Question 2: Time Series regression test of CAPM for one asset i (3 points)}
+Black, Jensen and Scholes (1972) suggest to test the empirical validity of the CAPM by estimating the following LRM: 
+
+\begin{align*}
+	r_{it} - r_{ft} &= \alpha_i + \beta_i(r_{mt} - r_{ft}) + u_{it}\\
+	z_{it} &= \alpha_i + \beta_i z_{mt} + u_{it}\\
+	u_{it}|z_{mt} &\sim iid(0, \omega^2_i)
+\end{align*}
+
+\subsection*{(i) Estimate $\hat{\alpha_i}$ and $\hat{\beta_i}$}
+NOTE : $\hat{\alpha_i}$ is the Jensen’s alpha, and represents an estimate of the expected return not justified by its exposure to market risk, the only one that matters according to the CAPM.
+
+\begin{align*}
+	x_t &= (1, z_{mt}') \\
+	X &= [x_1, ..., x_T]' \\
+	X'X &= T Sxx\\
+	Sxx &= \frac{1}{T}X'X = \left[\begin{array}{cc}
+		1 & \bar{z}_m \\
+		\bar{z}_m & \frac{1}{T}\sum{z_m^2}
+	\end{array}\right] \\	
+	Sxx^{-1} &= \left[\begin{array}{cc}
+		\frac{1}{T}\sum{z_m^2} & -\bar{z}_m \\
+		-\bar{z}_m & 1
+	\end{array}\right] = \left[\begin{array}{cc}
+	\frac{1}{T}\sum{z_m^2} - \bar{z}_m^2 + \bar{z}_m^2 & -\bar{z}_m \\
+	-\bar{z}_m & 1
+	\end{array}\right]\\
+	 &= \left[\begin{array}{cc}
+		\hat{\sigma}_m^2 + \bar{z}_m^2 & -\bar{z}_m \\
+		-\bar{z}_m & 1
+	\end{array}\right] = \left[\begin{array}{cc}
+	1 + \frac{\bar{z}_m^2}{\hat{\sigma}_m^2} & \frac{-\bar{z}_m}{\hat{\sigma}_m^2} \\
+	\frac{-\bar{z}_m}{\hat{\sigma}_m^2} & \frac{1}{\hat{\sigma}^2}
+	\end{array}\right]\\
+	Sxz_i &= X'z_i = \left[\begin{array}{c}
+		\bar{z}_i \\
+		\frac{1}{T}\sum{z_m z_i}
+	\end{array}\right] = \left[\begin{array}{c}
+		\bar{z}_i \\
+		\frac{1}{T}\sum{z_m z_i} - \bar{z}_m \bar{z}_i + \bar{z}_m \bar{z}_i
+	\end{array}\right] = \left[\begin{array}{c}
+		\bar{z}_i \\
+		\hat{\sigma}_{im} + \bar{z}_m \bar{z}_i 
+	\end{array}\right] \\
+\end{align*}
+
+Solving for $\hat{\alpha}_i$ and $\hat{\beta}_i$:
+\begin{align*}
+		Sxx \left[\begin{array}{c}
+		\hat{\alpha}_i \\
+		\hat{\beta}_i
+	\end{array}\right] & = Sxz_i\\
+	\left[\begin{array}{cc}
+		1 & \bar{z}_m \\
+		\bar{z}_m & \frac{1}{n}\sum{z_m^2}
+	\end{array}\right] \left[\begin{array}{c}
+		\hat{\alpha}_i \\
+		\hat{\beta}_i
+	\end{array}\right] &= \left[\begin{array}{c}
+		\bar{z}_i \\
+		\hat{\sigma}_{im} + \bar{z}_m \bar{z}_i 
+	\end{array}\right] \\	
+	\begin{array}{c}
+		(1) \\
+		(2)
+	\end{array}
+	\left[\begin{array}{c}
+		\hat{\alpha}_i + \hat{\beta}_i \bar{z}_m \\
+		\hat{\alpha}_i \bar{z}_m + \hat{\beta}_i \frac{1}{n}\sum{z_m^2}
+	\end{array}\right] &= \left[\begin{array}{c}
+		\bar{z}_i \\
+		\hat{\sigma}_{im} + \bar{z}_m \bar{z}_i 
+	\end{array}\right] \\
+\end{align*}
+
+From (1) follows directly: $\hat{\alpha}_i = \bar{z}_i - \hat{\beta}_i \bar{z}_m$. Inserting this into (2) yields:
+\begin{align*}
+	\hat{\alpha}_i \bar{z}_m + \hat{\beta}_i \frac{1}{n}\sum{z_m^2} &= \hat{\sigma}_{im} + \bar{z}_m \bar{z}_i \\
+	(\bar{z}_i - \hat{\beta}_i \bar{z}_m)\bar{z}_m + \hat{\beta}_i \frac{1}{n}\sum{z_m^2} &= \hat{\sigma}_{im} + \bar{z}_m \bar{z}_i \\
+	\bar{z}_i \bar{z}_m - \hat{\beta}_i \bar{z}_m^2 + \hat{\beta}_i \frac{1}{n}\sum{z_m^2} &= \hat{\sigma}_{im} + \bar{z}_m \bar{z}_i \\
+	- \hat{\beta}_i \bar{z}_m^2 + \hat{\beta}_i \frac{1}{n}\sum{z_m^2} &= \hat{\sigma}_{im}\\
+	\hat{\beta}_i  (\frac{1}{n}\sum{z_m^2}-\bar{z}_m^2) &= \hat{\sigma}_{im}\\
+	\hat{\beta}_i \hat{\sigma}_{m}^2 &= \hat{\sigma}_{im}\\
+	\hat{\beta}_i &=  \frac{\hat{\sigma}_{im}}{\hat{\sigma}_{m}^2}\\
+\end{align*}
+
+\subsection*{(ii) Distribution of  $\hat{\alpha}_i$ and $\hat{\beta}_i$}
+
+Expected value of $\hat{\alpha_i}$ and $\hat{\beta_i}$
+\begin{align*}
+	\hat{\beta} &= \left[\begin{array}{c}
+		\hat{\alpha}_i \\
+		\hat{\beta}_i
+	\end{array}\right] = (X'X)^{-1}X'z_i = (X'X)^{-1}X'(X \beta + u_{it})\\
+	E[\hat{\beta}|z_m] &= (X'X)^{-1}X'X \beta + (X'X)^{-1}X'E[u_{it}|z_m]\\
+	E[\hat{\beta}|z_m] &= \beta + (X'X)^{-1}X'0, \text{ by assumption } u_i|z_mt \sim iid(0, \omega_i^2)\\
+	E[\hat{\beta}|z_m] &= \beta\\
+	E\left[\begin{array}{c}
+		\hat{\alpha}_i \\
+		\hat{\beta}_i
+	\end{array}|z_m\right] &= \left[\begin{array}{c}
+	\alpha_i \\
+	\beta_i
+\end{array}\right]
+\end{align*}
+
+Variance $\hat{\alpha}_i$ and $\hat{\beta}_i$
+\begin{align*}
+	\hat{\beta} &= \left[\begin{array}{c}
+		\hat{\alpha}_i \\
+		\hat{\beta}_i
+	\end{array}\right]\\
+	V(\hat{\beta}|z_m) &= V((\hat{\beta} - \beta)|z_m) \text{ (given $\beta$ non-random)}\\
+	&= V((X'X)^{-1}X'u_{i}|z_m) = A V(u_{i}|z_m)A' \text{ (with $A=(X'X)^{-1}X'$)}\\
+	&= A E[u_{i}^2|z_m] A' = A \omega_i^2A' \text{ by assumption } u_i|z_mt \sim iid(0, \omega_i^2)\\
+	&= \omega_i^2AA' = \omega_i^2(X'X)^{-1}X'((X'X)^{-1}X')' = \omega_i^2(X'X)^{-1}X'X(X'X)^{-1}\\
+	&= \omega_i^2 (X'X)^{-1} = \omega_i^2 \frac{1}{T}Sxx^{-1}\\
+	&= \frac{\omega_i^2}{T}Sxx^{-1} = \frac{\omega_i^2}{T} \left[\begin{array}{cc}
+		1 + \frac{\bar{z}_m^2}{\hat{\sigma}_m^2} & \frac{-\bar{z}_m}{\hat{\sigma}_m^2} \\
+		\frac{-\bar{z}_m}{\hat{\sigma}_m^2} & \frac{1}{\hat{\sigma}^2}
+	\end{array}\right]
+\end{align*}
+
+Therefore
+
+\begin{align*}
+	\left[\begin{array}{c}
+		\hat{\alpha}_i \\
+		\hat{\beta}_i
+	\end{array}\right] | z_m &\sim N\left(
+		\left[\begin{array}{c}
+			\alpha_i \\
+			\beta_i
+		\end{array}\right], 
+		\frac{\omega_i^2}{T} \left[\begin{array}{cc}
+			1 + \frac{\bar{z}_m^2}{\hat{\sigma}_m^2} & \frac{-\bar{z}_m}{\hat{\sigma}_m^2} \\
+			\frac{-\bar{z}_m}{\hat{\sigma}_m^2} & \frac{1}{\hat{\sigma}^2}
+		\end{array}\right]
+	\right) \square
+\end{align*}
+
+\subsection*{(iii) Determine the t-statistics to test $H_0: \beta_{k=1} = \alpha_i = 0$}
+
+Analog to (ii) and replacing the unknown true $\omega_i$ with the sample $\hat{\omega}_i$ obtained from the OLS residuals
+\begin{align*}
+	V((\hat{\beta} - \beta)|z_m) &= \hat{\omega}_i^2 (X'X)^{-1} = \hat{\omega}_i^2 \frac{1}{T}Sxx^{-1}\\
+	V((\hat{\beta}_{k=1} - 0)|z_m) &= \omega_i^2 (X'X)_{kk}^{-1} = \hat{\omega}_i^2 \frac{1}{T}Sxx_{kk}^{-1}\\
+	&=  \frac{\hat{\omega}_i^2}{T}(1+\frac{\bar{z}_m^2}{\hat{\sigma}_m^2})\\
+	SE((\hat{\beta} - \beta)|z_m) &= \hat{\omega}_i[(1+\frac{\bar{z}_m^2}{\hat{\sigma}_m^2})/T]^{1/2}
+\end{align*}
+
+The t-statistic to test $H_0: \beta_{k=1} = \alpha_i = 0$ therefore is : $$ \xi_i = \frac{\hat{\alpha}_i - 0}{\hat{\omega}_i[(1+\frac{\bar{z}_m^2}{\hat{\sigma}_m^2})/T]^{1/2}}  \xrightarrow{d}  N(0,1)$$
+
+\section{Giovannis original text}
+\subsection{Set-up and Definitions}
+\begin{itemize}
+	\item We are assuming a timeseries regression for one asset: $i=1,...,N$, with N corresponding to the total number of securities available in the investable universe:
+	\begin{align} \label{timeseries}
+		r_{it} &= \alpha_i + \beta_{im} z_{mt} + u_{it} \quad t = 1,...,T \\ 
+		u_i|z_{mt} &\overset{iid}{\sim} (0, w_{i}^2) \notag \\ \notag
+	\end{align} \vspace{-3em}
+	\item $X$ is the matrix of the regressors.	
+	\item $E[x_ix_i']$ exists, and is definite positive.	
+	\item ${Rank}(X)$ = 2 (no redunant regressors), hence $(X'X)^{-1}$ exists.	
+	\item $\hat{\alpha}_i$ and $\hat{\beta}_{im}$ are the OLS estimators of $\alpha$ and $\beta$ in \ref{timeseries}.
+	\item $z_{mt}$ corresponds to the return of a market index (used as proxy of the market portfolio) at time $t$. 
+\end{itemize}
+\subsection{Part 1: Demonstrate that $\hat{\alpha}_i = \overline{r}_{i} - \hat{\beta_i}\overline{z}_{m}$ and $\hat{\beta_i} = \frac{\hat{\sigma}_{im}}{\hat{\sigma}_{m}^2}$} 
+Noting that if we substitute the intercept by adding $1_T$ as the first column of the regressors matrix: $X$, we can rewrite \ref{timeseries} in the following matricial representation: $r_{i,(1\times T)} =X_{i,(T\times 2)} \beta_{i,(2\times 1)} + u_{i,(T\times1)}$, with X  defined as a (1 x 2) matrix: $[1_{(T x 1)},z_{m,(T x 1)}]\footnote{The second term of each matrix subscript is meant to represent the dimension of the corresponding metric for the avoidance of doubt, we will drop such notation for tractability reasons.}$.\\
+Additionally, recalling that: i) the OLS estimator of $\alpha_i$ and $\beta_{im}$ corresponds to: $(X'X)^{-1}X'r_i$, ii) $1_{T}'1_T=T$ and iii) the inverse of $(X'X)^{-1}$ is:
+\begin{align} \label{(X'X)^-1}
+	\begin{bmatrix}
+		a & b \\ c & d
+	\end{bmatrix}
+	^{-1} &= \frac{1}{ad-bc}
+	\begin{bmatrix}
+		d & -b \\ -c & a
+	\end{bmatrix} \notag \\
+	(X'X)^{-1} &= \frac{1}{T\sum_{t=1}^{T}z_{mt}^2-(\sum_{t=1}^{T}z_{mt})^2} \begin{bmatrix} \sum_{t=1}^{T}z_{mt}^2 & -\sum_{t=1}^{T}z_{mt} \\ -\sum_{t=1}^{T}z_{mt} & T \end{bmatrix} 
+\end{align}
+And observing $X'r_{i} = \begin{bmatrix} \sum_{t=1}^{T}r_{it} \\ \sum_{t=1}^{T}z_{mt}r_{it} \end{bmatrix} $, we derive that:
+\begin{align} \label{derivation}
+	\hat{\beta_i} &= (X'X)^{-1}X'r_i \notag \\
+	&= \begin{bmatrix}
+		\frac{T(\frac{1}{T}\sum_{t=1}^{T}z_{mt}^2) T(\frac{1}{T}\sum_{t=1}^{T}r_{it}) - T(\frac{1}{T}\sum_{t=1}^{T}z_{mt})T(\frac{1}{T}\sum_{t=1}^{T}z_{mt}r_{it})}{T^2(\frac{1}{T}\sum_{t=1}^{T}z_{mt}^2)-T^2(\frac{1}{T}\sum_{t=1}^{T}z_{mt})^2} \\ \frac{T^2(\frac{1}{T}\sum_{t=1}^{T}z_{mt}r_{it}) - T(\frac{1}{T}\sum_{t=1}^{T}z_{mt}) T(\frac{1}{T}\sum_{t=1}^{T}r_{it})}{T^2(\frac{1}{T}\sum_{t=1}^{T}z_{mt}^2)-T^2(\frac{1}{T}\sum_{t=1}^{T}z_{mt})^2} 
+	\end{bmatrix}
+\end{align}
+Besides, we can further refine this expression by noting:
+\begin{itemize}
+	\item $\frac{1}{T}\sum_{t=1}^{T}z_{mt} =\overline{z}_m $
+	\item $\frac{1}{T}\sum_{t=1}^{T}r_{it} =\overline{r}_i $
+	\item $T^2(\frac{1}{T}\sum_{t=1}^{T}z_{mt}^2)-T^2(\frac{1}{T}\sum_{t=1}^{T}z_{mt})^2 = T^2\hat{\sigma}_{m}^2 $, with $\hat{\sigma}_{m}^2$ as the variance of the market index returns.
+	\item $T^2(\frac{1}{T}\sum_{t=1}^{T}z_{mt}r_{it}) - T(\frac{1}{T}\sum_{t=1}^{T}z_{mt}) T(\frac{1}{T}\sum_{t=1}^{T}r_{it}) = T^2\hat{\sigma}_{z,i}$, with $\hat{\sigma}_{z,i} $ as the covariance between the returns of the single asset and the market index.
+	\item $T(\frac{1}{T}\sum_{t=1}^{T}z_{mt}^2) T(\frac{1}{T}\sum_{t=1}^{T}r_{it}) - T(\frac{1}{T}\sum_{t=1}^{T}z_{mt})T(\frac{1}{T}\sum_{t=1}^{T}z_{mt}r_{it}) = \\ 
+	= T^2\overline{r}_i(\frac{1}{T}(\sum_{t=1}^{T}z_{mt}^2-\overline{z}_m{^2})- T^2\overline{z}_m(\frac{1}{T}(\sum_{t=1}^{T}z_{mt}r_{it}-\overline{z}_m\overline{r}_i) \\
+	= T^2(\overline{r}_i\hat{\sigma}_{m}^2 -\overline{z}_m\hat{\sigma}_{z,i})$
+\end{itemize}
+By substituting the formulae above into \ref{derivation}, we derive:
+\begin{align}
+	\hat{\beta_i} &= \begin{bmatrix} \hat{\alpha}_i \\ \hat{\beta}_{im} \end{bmatrix} \notag \\
+	&= \begin{bmatrix} \frac{\overline{r}_i\hat{\sigma}_{m}^2-\overline{z}_m\hat{\sigma}_{z,i}}{\hat{\sigma}_{m}^2} \\ \frac{\hat{\sigma}_{z,i}}{\hat{\sigma}_{m}^2} \end{bmatrix} \notag \\
+	&= \begin{bmatrix} \overline{r}_i - \overline{z}_m\hat{\beta}_{im} \\ \frac{\hat{\sigma}_{z,i}}{\hat{\sigma}_{m}^2} \end{bmatrix}
+\end{align}
+\subsection{Part 2: Demonstrate the asymptotic distribution of $\hat{\beta_i}|z_m$}
+As we are not assuming any specific form for $u_i|z_{mt}$, we will study the distribution of $\hat{\beta_i}|z_m$ asymptotically ($T \to \infty$). Therefore, by rearranging the definition of $\hat{\beta_i}$ we derive:  
+\begin{align*}
+	\hat{\beta_i} | z_{mt} &= (X'X)^{-1}X'r_i = \beta_i + (X'X)^{-1}X'u_i \\
+	\sqrt{T}(\hat{\beta_i} -\beta_i) &= \sqrt{T}(X'X)^{-1}X'u_i \\
+	&= (\frac{X'X}{T})^{-1}\sqrt{T}X'u_i 
+\end{align*}
+Further noting that (under $T \to +\infty$):
+\begin{itemize}
+	\item $(\frac{X'X}{T}) \overset{p}{\to} E[x_ix_i']$ due to the application of the Law of Large Numbers (LLN) because $[x_{it}]_{t=1}^T$ is a sequence of IID observations with finite expected value and variance. Additionally, by using the Slutsky's theorem we obtain: $(\frac{X'X}{T})^{-1} \overset{p}{\to} E[x_ix_i']^{-1}$. 	
+	\item $X'u_i \overset{d}{\to} X'N(0,w_i^2I_T)X$ due to the application of the Central Limit Theorem (CLT) in light of: i) IID observations, ii) errors uncorrelated with the regressors and iii) finite moments\footnote{As mentioned in the \textit{Set-up and Definitions} part of this exercise.}.
+\end{itemize}
+By applying the properties of the multivariate Normal distribution, we obtain:
+\begin{align*}
+	\hat{\beta_i} \overset{d}{\to} N(\beta_i, (X'X)^{-1}X'w_i^2I_TX(X'X)^{-1})
+\end{align*}
+Simplifying the variance term of the distribution of $\hat{\beta_i}$:
+\begin{align*}
+	V(\hat{\beta_i}) &= (X'X)^{-1}X'w_i^2I_TX(X'X)^{-1} \\
+	&= w_i^2 (X'X)^{-1}
+\end{align*}
+Additionally, we can rewrite \ref{(X'X)^-1} as per below:
+\begin{align} \label{X'X rearranged}
+	(X'X)^{-1} &=  \frac{1}{T^2\hat{\sigma}_{m}^2} 
+	\begin{bmatrix} (\sum_{t=1}^{T}z_{mt}^2) -T\overline{z}_m^2 + T\overline{z}_m^2 & -T\overline{z}_m \\ -T\overline{z}_m & T \end{bmatrix} \notag \\
+	&= 	\frac{1}{T^2\hat{\sigma}_{m}^2}
+	\begin{bmatrix} (T\hat{\sigma}_{m}^2 + T\overline{z}_m^2) & -T\overline{z}_m \\ -T\overline{z}_m & T \end{bmatrix} \notag \\
+	&=  \frac{1}{T} 
+	\begin{bmatrix} (1 + \frac{\overline{z}_m^2}{\hat{\sigma}_{m}^2}) & \frac{-\overline{z}_m}{\hat{\sigma}_{m}^2} \\ \frac{-\overline{z}_m}{\hat{\sigma}_{m}^2} & \frac{1}{\hat{\sigma}_{m}^2} \end{bmatrix}   
+\end{align}
+Eventually, we conclude this demonstration by expanding $\hat{\beta}_i$ into its components and by replacing \ref{X'X rearranged} into $\hat{\beta}_i \overset{d}{\to} N(\beta_i,V(\hat{\beta_i})$:
+\begin{align}
+	\begin{bmatrix} \hat{\alpha}_i \\ \hat{\beta}_{im} \end{bmatrix}
+	\sim N(\begin{bmatrix} \alpha_i \\ \beta_{im} \end{bmatrix}, \frac{w_i^2}{T}\begin{bmatrix} (1 + \frac{\overline{z}_m^2}{\hat{\sigma}_{m}^2}) & \frac{-\overline{z}_m}{\hat{\sigma}_{m}^2} \\ \frac{-\overline{z}_m}{\hat{\sigma}_{m}^2} & \frac{1}{\hat{\sigma}_{m}^2} \end{bmatrix}) 
+\end{align}
+\subsection{Part 3: Demonstrate the t-statistics to test $H_0$: $\alpha_i = 0 $}
+We add below a few considerations additional to what presented in \textit{Set-up and Definitions} to support this proof:
+\begin{itemize}
+	\item We are studying the asymptotic distribution of this test under $T \to +\infty$\footnote{Indeed, no distribution is provided for the errors in \ref{timeseries}.}.	
+	\item This is a linear hypothesis test, with $m = 1$ linear restrictions tested\footnote{The only restriction we are imposing on $\beta_i$ is: $\alpha_i = 0 $.}.
+	\item The generic matrix R (m x K), formalizing the linear restrictions on $\beta$, corresponds to the vector $\begin{bmatrix} 1 & 0 \end{bmatrix}$.
+	\item The generic vector q (m x 1) represents the restricted values imposed on $\beta$. As we are imposing only one restriction, q corresponds to a scalar metric: 0.
+	\item As we don't know the actual variance of $u_i|z_{mt}$ but we estimate the corresponding OLS residuals, we utilize $\frac{1}{T}\sum_{t=1}^{T}\hat{u}_{it}^2$ as an asymptotically unbiased estimator by applying the LLN\footnote{$\overline{u}_i = 0$ because of the inclusion of the intercept in $X$.}.
+\end{itemize}
+Under the null hypothesis $H_0$: $R\beta_i=q$:
+\begin{align*}
+	R\hat{\beta_i}-q = R(\hat{\beta_i} - \beta_i)
+\end{align*}
+Furthermore, as proved in the previous exercise and by applying the properties of the multivariate Gaussian distribution, we derive:
+\begin{align} \label{2.3}
+	R(\hat{\beta}_i-\beta_i) &\sim N(0, RV(\beta_i)R') \notag \\
+	[RV(\beta_i)R']^{-\frac{1}{2}}R(\hat{\beta}_i-\beta_i) &\overset{d}{\to} N(0,I_m)
+\end{align}
+By substituting for $R=\begin{bmatrix} 1 & 0 \end{bmatrix}$ in $RV(\beta_i)R'$ and rearranging the terms:
+\begin{align*}
+	RV(\beta_i)R' &= \frac{w_i{^2}}{T} \begin{bmatrix} 1 & 0 \end{bmatrix} \begin{bmatrix} (1 + \frac{\overline{z}_m^2}{\hat{\sigma}_{m}^2}) & \frac{-\overline{z}_m}{\hat{\sigma}_{m}^2} \\ \frac{-\overline{z}_m}{\hat{\sigma}_{m}^2} & \frac{1}{\hat{\sigma}_{m}^2} \end{bmatrix} \begin{bmatrix} 1 \\ 0 \end{bmatrix} \\
+	&= \frac{w_i{^2}}{T}(1 + \frac{\overline{z}_m^2}{\hat{\sigma}_{m}^2})
+\end{align*}
+Therefore \ref{2.3} becomes:
+\begin{align*}
+	[RV(\beta_i)R']^{-\frac{1}{2}}R(\hat{\beta}_i-\beta_i) &= \frac{R(\hat{\beta}_i-\beta_i)}{w_i\sqrt{\frac{(1 + \frac{\overline{z}_m^2}{\hat{\sigma}_{m}^2})}{T}}} \\
+	&= \frac{\hat{\alpha}_i - \alpha|H_0}{w_i\sqrt{\frac{(1 + \frac{\overline{z}_m^2}{\hat{\sigma}_{m}^2})}{T}}} \\
+	&= \frac{\hat{\alpha}_i}{w_i\sqrt{\frac{(1 + \frac{\overline{z}_m^2}{\hat{\sigma}_{m}^2})}{T}}}
+\end{align*}
+Eventually by using the unbiased estimator for $w_i^2$, as mentioned at the beginning of this proof, we derive\footnote{$I_m$ is the scalar 1, hence $N(0,I_m) = N(0,1)$.}: 
+\begin{align}
+	\frac{\hat{\alpha}_i}{\hat{w}_i\sqrt{\frac{(1 + \frac{\overline{z}_m^2}{\hat{\sigma}_{m}^2})}{T}}} \overset{d}{\to} N(0,1)
+\end{align}
+\end{document}
