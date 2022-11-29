@@ -124,9 +124,9 @@ Issues with these regressions:
 	\begin{itemize}
 		\item For $\hat{\beta}$ to converge to $\beta_0$ asymptotically, the bias $(\hat{\beta} - \beta_0)$ must be $O_p(1)$: 
 		\begin{align*}
-			(\hat{\beta} - \beta_0) &= (X'X)^{-1}X'u, with\\
-			(X'X)^{-1} &\in O_p(n^{-1}) and \\
-			X'u &\in O_p(n^{.5}). consequently:\\
+			(\hat{\beta} - \beta_0) &= (X'X)^{-1}X'u, \text{with}\\
+			(X'X)^{-1} &\in O_p(n^{-1}) \text{and} \\
+			X'u &\in O_p(n^{.5}). \text{consequently:}\\
 			n^{.5}(\hat{\beta} - \beta_0) &= n^{.5}(X'X)^{-1}X'u = n^{.5} O_p(n^{-1})O_p(n^{.5}) = O_p(1)
 		\end{align*}
 		\item The relevant assumption to be tested is therefore is $(X'X) \in n^{.5} O_p(n^{-1})$.
