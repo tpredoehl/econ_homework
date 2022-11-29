@@ -147,7 +147,7 @@ Simplifying the variance term of the distribution of $\hat{\beta_i}$:
 \begin{align*}
 	V(\hat{\beta_i}) &= (X'X)^{-1}X'w_i^2I_TX(X'X)^{-1} \\
 	&= w_i^2 (X'X)^{-1}\\
-	&= 
+	&= \frac{w_i^2}{T\sigma_{m}^2}Sxx\\
 	&=  \frac{w_i^2}{T} 
 	\begin{bmatrix} (1 + \frac{\overline{z}_m^2}{\hat{\sigma}_{m}^2}) & \frac{-\overline{z}_m}{\hat{\sigma}_{m}^2} \\ \frac{-\overline{z}_m}{\hat{\sigma}_{m}^2} & \frac{1}{\hat{\sigma}_{m}^2} \end{bmatrix}   
 \end{align*}
