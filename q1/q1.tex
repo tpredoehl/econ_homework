@@ -48,7 +48,7 @@
 	\subitem \textbf{A.1: independent observations} $y_i, x_i$ are i.i.d, which is equivalent to $v_t|x$ and $v_t|y$ being i.i.d.
 	\subitem \textbf{A.2: regressors are uncorrelated with errors} $E[v_t x_t]=E[v_t y_t]=0$. This assumption is weaker than strict exogeneity and is not restricting the utilization of lagged values of the dependent variable into the regressors matrix.
 	\subitem \textbf{A.3 Identification} $Q= E[x_{t}x_{t}']$ exists, is positive definite and has rank corresponding to the total number of regressors (no regressor is a linear combination of the others).
-	\subitem \textbf{A.4: Finite Moments } $S = E[v_{t}^2x_{t}x_{t}']$ \alert{exists} and is positive definite, with 
+	\subitem \textbf{A.4: Finite Moments } $S = E[v_{t}^2x_{t}x_{t}']$ exists and is positive definite, with 
 		\begin{align*}
 			S &= E[v_{t}^2x_{t}x_{t}']\\
 			&= E[v_t^2]E[x_tx_t']+cov(v_t,x_t)\\
@@ -95,7 +95,7 @@ The results obtained are different from what we previously expected. Indeed, by 
 \begin{itemize}
 	\item The simulated rate of rejection in $LRM_4$ converges asymptotically to 5\% and significantly higher for the three other $LRM_{1-3}$.
 	\item Additionally, we notice that the proportion of rejections keeps increasing in T for $LRM_1$ and $LRM_2$ implying a statistically significant relationship ($\beta_2$) between $y_t$ and $x_t$ even if this should not exist.
-	\item Therefore, it emerges that the actual probability of a mistaken rejection of the true H0, i.e. committing a Type 1 error\footnote{$P(R_{H_0}|H_0)$.} \alert{is significantly higher than the assumed test size.}
+	\item Therefore, it emerges that the actual probability of a mistaken rejection of the true H0, i.e. committing a Type 1 error\footnote{$P(R_{H_0}|H_0)$.} is significantly \comment{higher than the assumed test size}{do you mean T?}.
 \end{itemize}
 Usually, the bias of the $\beta$ multipled by $n^{0.5}$ is $O_{p}(1)$, as per below demonstration and noting that $K'K = O_{p}(T)$ and $K'v = O_{p}(T^{0.5})$:
 \begin{align*}
