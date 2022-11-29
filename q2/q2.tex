@@ -8,7 +8,21 @@
 \begin{document}
 
 \maketitle
-
+\section{combined version}
+\subsection{Set-up and Definitions}
+\begin{itemize}
+	\item Black, Jensen and Scholes (1972) suggest to test the empirical validity of the CAPM by estimating the following LRM: 
+	\begin{align*}
+		r_{it} - r_{ft} &= \alpha_i + \beta_i(r_{mt} - r_{ft}) + u_{it}\\
+		z_{it} &= \alpha_i + \beta_i z_{mt} + u_{it}\\
+		u_{it}|z_{mt} &\sim iid(0, \omega^2_i)
+	\end{align*}
+	\item $X$ is the matrix of the regressors.	
+	\item $E[x_ix_i']$ exists, and is definite positive.	
+	\item ${Rank}(X)$ = 2 (no redunant regressors), hence $(X'X)^{-1}$ exists.	
+	\item $\hat{\alpha}_i$ and $\hat{\beta}_{im}$ are the OLS estimators of $\alpha$ and $\beta$ in \ref{timeseries}.
+	\item $z_{mt}$ corresponds to the return of a market index (used as proxy of the market portfolio) at time $t$. 
+\end{itemize}
 
 \section{Giovannis original text}
 \subsection{Set-up and Definitions}
