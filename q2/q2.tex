@@ -18,10 +18,11 @@
 		u_{it}|z_{mt} &\sim iid(0, \omega^2_i)
 	\end{align*}
 	\item $X$ is the matrix of the regressors.	
-	\item $E[x_ix_i']$ exists, and is definite positive.	
-	\item ${Rank}(X)$ = 2 (no redunant regressors), hence $(X'X)^{-1}$ exists.	
-	\item $\hat{\alpha}_i$ and $\hat{\beta}_{im}$ are the OLS estimators of $\alpha$ and $\beta$ in \ref{timeseries}.
-	\item $z_{mt}$ corresponds to the return of a market index (used as proxy of the market portfolio) at time $t$. 
+	\item $E[x_ix_i']$ exists, and is positive definite.	
+	\item X has full rank with ${rank}(X)$ = 2 (no redundant regressors).
+	\item X is invertible.	
+	\item $\hat{\alpha}_i$ and $\hat{\beta}_{im}$ are the OLS estimators of $\alpha$ and $\beta$.
+	\item $z_{mt}$ corresponds to the excess return of the market index (used as proxy of the market portfolio) at time t. 
 \end{itemize}
 
 \section{Giovannis original text}
