@@ -77,6 +77,7 @@ Additionally, recalling that: i) the OLS estimator of $\alpha_i$ and $\beta_{im}
 	\end{bmatrix} \notag \\
 	(X'X)^{-1} &= \frac{1}{T\sum_{t=1}^{T}z_{mt}^2-(\sum_{t=1}^{T}z_{mt})^2} \begin{bmatrix} \sum_{t=1}^{T}z_{mt}^2 & -\sum_{t=1}^{T}z_{mt} \\ -\sum_{t=1}^{T}z_{mt} & T \end{bmatrix} 
 \end{align}
+\highlightTP{T in the denominator should be taken out of the matrix}
 And observing $X'r_{i} = \begin{bmatrix} \sum_{t=1}^{T}r_{it} \\ \sum_{t=1}^{T}z_{mt}r_{it} \end{bmatrix} $, we derive that:
 \begin{align} \label{derivation}
 	\hat{\beta_i} &= (X'X)^{-1}X'r_i \notag \\
