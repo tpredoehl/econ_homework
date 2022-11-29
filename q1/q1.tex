@@ -60,7 +60,7 @@
 \subsection*{1.a Replication of Figure 14.1 in Davidson MacKinnon (2005, book) }
 \subsubsection*{(i) Compute for each sample size T the distribution of the $R^2$ of the MC simulations with either 7 separate histograms, or one unique figure where you report on the y-axis the 5\%, 10\% 25\%, 50\%, 75\%, 90\% and 95\% quantiles of the distributions of the simulated $R^2$, and on the x-axis you have T = 6, 12, 60, 120, 240, 360, 480.}
 
-$LRM_1$ spurious regression of random walks with $\phi=1$ should produce $R^2$ near 0 given that $\beta_2$ is expected to be insignificant. The distribution of simulated $R^2$ however indicates that this is not the case for any length of timeseries. 
+$LRM_1$ \alert{spurious} regression of random walks with $\phi=1$ should produce $R^2$ near 0 given that $\beta_2$ is expected to be insignificant. The distribution of simulated $R^2$ however indicates that this is not the case for any length of timeseries. 
 
 \begin{figure}[H]
 	\centering
@@ -91,7 +91,7 @@ The dispersion of the t-statistic $t_{\beta_2} = \frac{\beta_2 - 0}{\sigma_{\bet
 \newpage
 \subsection*{1b: Summarize the problems of spurious regressions in econometrics}
 
-The results obtained are \alert{different} from what we previously expected. Indeed, by looking at Figure 3, we can observe that:
+The results obtained are different from what we previously expected. Indeed, by looking at Figure 3, we can observe that:
 \begin{itemize}
 	\item The simulated rate of rejection in $LRM_4$ converges asymptotically to 5\% and significantly higher for the three other $LRM_{1-3}$.
 	\item Additionally, we notice that the proportion of rejections keeps increasing in T for $LRM_1$ and $LRM_2$ implying a statistically significant relationship ($\beta_2$) between $y_t$ and $x_t$ even if this should not exist.
