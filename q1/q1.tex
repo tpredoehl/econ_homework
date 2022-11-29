@@ -129,7 +129,7 @@ Usually, the bias of the $\beta$ multipled by $n^{0.5}$ is $O_{p}(1)$, as per be
 	&= O_{p}(1)  
 \end{align*}
 The bias is eventually bounded for $T \to +\infty$, so it does not explode asymptotically.\\ 
-However, we have here an issue of unit roots and spurious regressions. If, at least, one of the regressors is a unit root\footnote{This happens for $LRM_1$ and $LRM_3$, although for the latter the proportion of rejections does not converge to 1 as T increases. \commentTP{This is because we are reducing $y_t$ by one lag turning the dependent variable into a white noise random walk.}{I think this has to do with $LRM_3$ being a valid regression as opposed to $LRM_1$}}, we can derive that $E[K_{t}'K_{t}]$ is not a finite positive definite matrix anymore and there is a violation of the OLS assumptions under asymptotic theory (steps below are for DPG 1\footnote{$V(x_t) = E(x_{t}^2) = t$.}, same holds in case of multiple regressors):
+However, we have here an issue of unit roots and spurious regressions. If, at least, one of the regressors is a unit root\footnote{This happens for $LRM_1$ and $LRM_3$, although for the latter the proportion of rejections does not converge to 1 as T increases. This is because we are reducing $y_t$ by one lag turning the dependent variable into a white noise random walk}, we can derive that $E[K_{t}'K_{t}]$ is not a finite positive definite matrix anymore and there is a violation of the OLS assumptions under asymptotic theory (steps below are for DPG 1\footnote{$V(x_t) = E(x_{t}^2) = t$.}, same holds in case of multiple regressors):
 \begin{align*}
 	E[x_{T}'x_{T}] &= \sum_{t=1}^{T}x_{t}^2 \\  
 	&= T + (T-1) +...+2+1 \\
