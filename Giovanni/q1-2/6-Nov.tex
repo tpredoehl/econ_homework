@@ -42,7 +42,7 @@
 	\subsection{Set-up and Definitions}
 	\begin{itemize}
 		\item We are studying two independent stochastic processes: $y_t$ and $x_t$  with $t=1,...,T$.
-		\item Each characterization of these processes is assumed to have independent errors: $u_{y,t} 5$ and $u_{x,t} \overset{iid}{\sim}N(0,1)$.
+		\item Each characterization of these processes is assumed to have independent errors: $u_{y,t}$ and $u_{x,t} \overset{iid}{\sim}N(0,1)$.
 			\subitem Both errors are standardized random walk stochastic processes.
 		\item The different regression \replacedTP{modeles}{models} we are testing here result from the two processes below:
 			\subitem $y_t = y_{t-1} + u_{y,t}$ and $x_t = x_{t-1} + u_{x,t}$ \vspace{0.5em}\\ 
@@ -55,7 +55,7 @@
 			This assumption is not restricting the utilization of lagged values of the dependent variable into the regressors matrix.
 			\subitem A.3: The VaR-Cov matrix of the regressors: $Q= E[k_{t}k_{t}']$ exists, is positive definite and has rank corresponding to the total number of regressors (no regressor is a linear combination of the others).
 			\subitem A.4: $E[v_{t}^2k_{t}k_{t}']$ exists and is positive definite.
-		\item The Monte Carlo exercise is based on $N_{sim} = 10,000$.
+		\item The Monte Carlo exercise is based on $N_{sim} = 100,000$.
 		\item We will test each regression model assuming different samples of pairs of observations: $t=6, 12, 60, 120, 240, 360, 480$.      	 	
 	\end{itemize}
 	\subsection{Part 1: Replication of the exercise for Figure 14.1 in Davidson MacKinnon (2005, book)}
@@ -112,7 +112,7 @@
 	v_t &= 0.8(u_{y,t-1} + 0.8y_{t-2}) + +u_{y,t} \; t=1,...,T
 	\end{align*}
 	This intuition suggests that there is serial autocorrelation in the errors and the (asymptotic) solution to avoid too small standard errors in finite samples is to switch from the OLS VaR-Cov estimator to the Newey-West heteroskedasticity and autocorrelation consistent (HAC) one.
-	\section{Exercise 2: Univariate Time Series Regression and Jensen's alpha}
+\section{Exercise 2: Univariate Time Series Regression and Jensen's alpha}
 	\subsection{Set-up and Definitions}
 	\begin{itemize}
 		\item We are assuming a timeseries regression for one asset: $i=1,...,N$, with N corresponding to the total number of securities available in the investable universe:
