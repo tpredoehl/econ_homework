@@ -58,7 +58,7 @@
 		r_{it} &= \alpha_i + \beta_{im} z_{mt} + u_{it} \quad t = 1,...,T \\ 
 		u_i|z_{mt} &\overset{iid}{\sim} (0, w_{i}^2) \notag \\ \notag
 	\end{align} \vspace{-3em}
-	\highlightTP{This model is based on excess returns, i.e. should change $r_{it}$ to $r_{it}-r_f=z_{it}$}
+	\highlightTP{This model is based on excess returns, i.e. should change $r_{it}$ to $r_{it}-r_{ft}=z_{it}$}
 	\item $X$ is the matrix of the regressors.	
 	\item $E[x_ix_i']$ exists, and is definite positive.	
 	\item ${Rank}(X)$ = 2 (no redunant regressors), hence $(X'X)^{-1}$ exists.	
@@ -206,7 +206,7 @@ NOTE : $\hat{\alpha_i}$ is the Jensen’s alpha, and represents an estimate of t
 		1 + \frac{\bar{z}_m^2}{\hat{\sigma}_m^2} & \frac{-\bar{z}_m}{\hat{\sigma}_m^2} \\
 		\frac{-\bar{z}_m}{\hat{\sigma}_m^2} & \frac{1}{\hat{\sigma}^2}
 	\end{array}\right]\\
-	Sxz_i &= X'z_i = \left[\begin{array}{c}
+	Sxz_i &= \frac{1}{T}X'z_i = \left[\begin{array}{c}
 		\bar{z}_i \\
 		\frac{1}{T}\sum{z_m z_i}
 	\end{array}\right] = \left[\begin{array}{c}
@@ -220,10 +220,10 @@ NOTE : $\hat{\alpha_i}$ is the Jensen’s alpha, and represents an estimate of t
 
 Solving for $\hat{\alpha}_i$ and $\hat{\beta}_i$:
 \begin{align*}
-	Sxx \left[\begin{array}{c}
+	TSxx \left[\begin{array}{c}
 		\hat{\alpha}_i \\
 		\hat{\beta}_i
-	\end{array}\right] & = Sxz_i\\
+	\end{array}\right] & = TSxz_i\\
 	\left[\begin{array}{cc}
 		1 & \bar{z}_m \\
 		\bar{z}_m & \frac{1}{n}\sum{z_m^2}
