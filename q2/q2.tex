@@ -1,6 +1,31 @@
 \documentclass[]{article}
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{multicol}
+
+
+%\usepackage{easyReview} %used for annotation. Cannot be run together with (changes) - command "highlight" defined twice
+\usepackage{changes}%use while actively annotating
+
+%\usepackage[final]{changes} % once we are happy with all annotation, we can accept all proposed changes and show only the final document.
+
+% simply select text you want to annotate and start typing the command \replacedGM{the selected text will appear here}{and here you enter the new replacement text}
+\definechangesauthor[name={Timo}, color=orange]{tp}
+\definechangesauthor[name={Giovanni}, color=green]{gm}
+\newcommand{\replacedTP}[2]{\replaced[id=tp]{#2}{#1}}
+\newcommand{\addedTP}[1]{\added[id=tp]{#1}}
+\newcommand{\deletedTP}[1]{\deleted[id=tp]{#1}}
+\newcommand{\highlightTP}[1]{\highlight[id=tp]{#1}}
+\newcommand{\commentTP}[2]{\comment[id=tp]{#2}{#1}}
+
+\newcommand{\replacedGM}[2]{\replaced[id=gm]{#2}{#1}}
+\newcommand{\addedGM}[1]{\added[id=gm]{#1}}
+\newcommand{\deletedGM}[1]{\deleted[id=gm]{#1}}
+\newcommand{\highlightGM}[1]{\highlight[id=gm]{#1}}
+\newcommand{\commentGM}[2]{\comment[id=gm]{#2}{#1}}
+
 %opening
 \title{Question 2: Univariate time series regression test of CAPM for one asset}
 \author{}
@@ -50,7 +75,7 @@ Additionally, recalling that: i) the OLS estimator of $\alpha_i$ and $\beta_{im}
 	\begin{bmatrix}
 		d & -b \\ -c & a
 	\end{bmatrix} \notag \\
-	(X'X)^{-1} &= \frac{1}{T\sum_{t=1}^{T}z_{mt}^2-(\sum_{t=1}^{T}z_{mt})^2} \begin{bmatrix} \sum_{t=1}^{T}z_{mt}^2 & -\sum_{t=1}^{T}z_{mt} \\ -\sum_{t=1}^{T}z_{mt} & T \end{bmatrix} 
+	(X'X)^{-1} &= \frac{1}{\commentTP{T}{should be taken out of the matrix}\sum_{t=1}^{T}z_{mt}^2-(\sum_{t=1}^{T}z_{mt})^2} \begin{bmatrix} \sum_{t=1}^{T}z_{mt}^2 & -\sum_{t=1}^{T}z_{mt} \\ -\sum_{t=1}^{T}z_{mt} & T \end{bmatrix} 
 \end{align}
 And observing $X'r_{i} = \begin{bmatrix} \sum_{t=1}^{T}r_{it} \\ \sum_{t=1}^{T}z_{mt}r_{it} \end{bmatrix} $, we derive that:
 \begin{align} \label{derivation}
