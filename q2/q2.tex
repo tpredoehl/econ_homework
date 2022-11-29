@@ -159,6 +159,7 @@ Additionally, recalling that: i) the OLS estimator of $\alpha_i$ and $\beta_{im}
 \highlightTP{simplification 1: T in the denominator should be taken out of the matrix}\\
 \highlightTP{simplification 2: $\sum_{t=1}^{T}z_{mt}^2-(\sum_{t=1}^{T}z_{mt})^2=\sigma_{m}^2$}\\
 And observing $X'r_{i} = \begin{bmatrix} \sum_{t=1}^{T}r_{it} \\ \sum_{t=1}^{T}z_{mt}r_{it} \end{bmatrix} $, we derive that:
+\highlightTP{simplification 3: take out 1/T. gets rid of the first sum}
 \begin{align} \label{derivation}
 	\hat{\beta_i} &= (X'X)^{-1}X'r_i \notag \\
 	&= \begin{bmatrix}
