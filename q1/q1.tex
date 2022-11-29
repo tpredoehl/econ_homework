@@ -78,4 +78,36 @@ The dispersion of the t-statistic $t_{\beta_2} = \frac{\beta_2 - 0}{\sigma_{\bet
 	\includegraphics[width=14cm, height=12cm]{"./1aiii_chart"}
 \end{center}
 
+	\subsection{Part 2: Summarize the problems of spurious regressions in econometrics}
+The results obtained are different from what we previously expected. Indeed, by looking at Figure 1.3, we can observe that:
+\begin{itemize}
+	\item Apart from DPG 4 whose $H_0$ rejection rate converges asymptotically to 5\%, the empirical rejection rate is structurally higher than the significance level for the three other processes.
+	\item Additionally, we notice that the proportion of rejections keeps increasing alongside the sample size for DPG 1 always implying a statistically significant relationship bwetween $y_t$ and $x_t$ even if this does not exist.
+	\item Therefore, it emerges that the actual probability of a Type 1 error\footnote{$P(R_{H_0}|H_0)$.} is significantly higher than the assumed test size.
+\end{itemize}
+Usually, the bias of the $\beta$ multipled by $n^{0.5}$ is $O_{p}(1)$, as per below demonstration and noting that $K'K = O_{p}(T)$ and $K'v = O_{p}(T^{0.5})$:
+\begin{align*}
+	\hat{\beta} - \beta &= (K'K)^{-1}K'v \\
+	T^{0.5}(\hat{\beta} - \beta) &= T^{0.5}((K'K)^{-1}K'v) \\
+	&= T^{0.5}O_{p}(T^{-1}O_{p}(T^{0.5}) \\
+	&= O_{p}(1)  
+\end{align*}
+The bias is eventually bounded for $T \to +\infty$, so it does not explode asymptotically.\\ 
+However, we have here an issue of unit roots and spurious regressions. If, at least, one of the regressors is a unit root\footnote{This happens for DPG 1 and 3, although for the latter the proportion of rejections does not coverge to 1 as $t$ increases. This is because we are reducing $y_t$ by one lag turning the dependent variable into a white noise random walk.}, we can derive that $E[K_{t}'K_{t}]$ is not a finite positive definite matrix anymore and there is a violation of the OLS assumptions under asymptotic theory (steps below are for DPG 1\footnote{$V(x_t) = E(x_{t}^2) = t$.}, same holds in case of multiple regressors):
+\begin{align*}
+	E[x_{T}'x_{T}] &= \sum_{t=1}^{T}x_{t}^2 \\  
+	&= T + (T-1) +...+2+1 \\
+	&= \frac{T(T+1)}{2}
+\end{align*}
+It follows that: i) $T^{-1}x_{T}'x_{T}$ is $O(T)$ and ii) this metric does not have a finite probability limit ($T \to + \infty$). \\
+The distribution of the t-statistics does not converge to the Student's $t$ even asymptotically causing an overrejection of the null.\\
+Eventually, we observe that the issue of spurious regressions occurs even if all variables are stationary\footnote{AR(1) in this case.}.
+Although the proportion of rejections converges to a fixed number and $E[K_{t}'K_{t}]$ is a finite definite positive metric, we can see that the result for DPG 2 implies an overrejection of the null while the empirical frequency for DPG 4, the only correct regression model, converges to the $5\%$ significance level only after increasing significantly the sample size (in the order of a few thousand observations). \\  
+The distortion for DPG 3 arises from the fact that neither the constant nor $x_t$ have any explanatory power for $y_t$, therefore $y_t = v_t = 0.8y_{t-1}+u_{y,t}$.\\ As $y_t$ is modelled as an AR(1), the error term of DPG 3 becomes:
+\begin{align*}
+	v_t &= 0.8y_{t-1}+u_{y,t} \\
+	v_t &= 0.8(u_{y,t-1} + 0.8y_{t-2}) + +u_{y,t} \; t=1,...,T
+\end{align*}
+This intuition suggests that there is serial autocorrelation in the errors and the (asymptotic) solution to avoid too small standard errors in finite samples is to switch from the OLS VaR-Cov estimator to the Newey-West heteroskedasticity and autocorrelation consistent (HAC) one.
+
 \end{document}
