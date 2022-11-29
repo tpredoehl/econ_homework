@@ -139,10 +139,10 @@ Issues with these regressions:
 		\end{align*} Consequently, both $x_t$ and $y_t$ are I(1) given $\phi=1$.
 		\item Further, $LRM_1$ and $LRM_3$ reduce recursively to $w_t = \sum^t_{s=1}{\epsilon_s}$, which enters as $X'X$ or: \begin{align*}
 			\sum_{t=1}^n \left( \sum_{r=1}^t \sum_{s=1}^t \right) \epsilon_r \epsilon_s &= \sum_{t=1}^n \sum_{r=1}^t E(\epsilon_r^2), \epsilon_r\epsilon_s=0 \;\forall r \ne s\\
-			\sum_{t=1}^n \sum_{r=1}^t \sigma^2 &= \sum_{t=1}^n \sum_{r=1}^t 1 , \text{given iid assumption}\\
+			\sum_{t=1}^n \sum_{r=1}^t \sigma^2 &= \sum_{t=1}^n \sum_{r=1}^t 1 , \text{by assumption}\\
 			\sum_{t=1}^n t  &= \frac{1}{2}n(n+1)
 		\end{align*}
-		\item Consequently, given (14.01) being I(1), $X'X \in O_p(n^2)$ and therefore cannot possibly converge to a finite probability limit. The bias $(\hat{\beta} - \beta_0)$ therefore does not converge asymptotically in probability.
+		\item Consequently, being I(1), $X'X \in O_p(n^2)$ and therefore cannot possibly converge to a finite probability limit. The bias $(\hat{\beta} - \beta_0)$ therefore does not converge asymptotically in probability.
 	\end{itemize}
 	
 	\item 
