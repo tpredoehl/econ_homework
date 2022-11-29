@@ -137,7 +137,7 @@ As we are not assuming any specific form for $u_i|z_{mt}$, we will study the dis
 Further noting that (under $T \to +\infty$):
 \begin{itemize}
 	\item $(\frac{X'X}{T}) \overset{p}{\to} E[x_ix_i']$ due to the application of the Law of Large Numbers (LLN) because $[x_{it}]_{t=1}^T$ is a sequence of IID observations with finite expected value and variance. Additionally, by using the Slutsky's theorem we obtain: $(\frac{X'X}{T})^{-1} \overset{p}{\to} E[x_ix_i']^{-1}$. 	
-	\item $X'u_i \overset{d}{\to} X'N(0,w_i^2I_T)X$ due to the application of the Central Limit Theorem (CLT) in light of: i) IID observations, ii) errors uncorrelated with the regressors and iii) \commentTP{finite moments}{not sure...}\footnote{As mentioned in the \textit{Set-up and Definitions} part of this exercise.}.
+	\item $X'u_i \overset{d}{\to} X'N(0,w_i^2I_T)X$ due to the application of the Central Limit Theorem (CLT) in light of: i) IID observations, ii) errors uncorrelated with the regressors and iii) \commentTP{finite moments}{not sure about the meaning?}\footnote{As mentioned in the \textit{Set-up and Definitions} part of this exercise.}.
 \end{itemize}
 By applying the properties of the multivariate Normal distribution, we obtain:
 \begin{align*}
@@ -146,17 +146,10 @@ By applying the properties of the multivariate Normal distribution, we obtain:
 Simplifying the variance term of the distribution of $\hat{\beta_i}$:
 \begin{align*}
 	V(\hat{\beta_i}) &= (X'X)^{-1}X'w_i^2I_TX(X'X)^{-1} \\
-	&= w_i^2 (X'X)^{-1}
-\end{align*}
-Additionally, we can rewrite \ref{(X'X)^-1} as per below:
-\begin{align} \label{X'X rearranged}
-	(X'X)^{-1} &=  \frac{1}{T^2\hat{\sigma}_{m}^2} 
-	\begin{bmatrix} (\sum_{t=1}^{T}z_{mt}^2) -T\overline{z}_m^2 + T\overline{z}_m^2 & -T\overline{z}_m \\ -T\overline{z}_m & T \end{bmatrix} \notag \\
-	&= 	\frac{1}{T^2\hat{\sigma}_{m}^2}
-	\begin{bmatrix} (T\hat{\sigma}_{m}^2 + T\overline{z}_m^2) & -T\overline{z}_m \\ -T\overline{z}_m & T \end{bmatrix} \notag \\
+	&= w_i^2 (X'X)^{-1}\\
 	&=  \frac{1}{T} 
 	\begin{bmatrix} (1 + \frac{\overline{z}_m^2}{\hat{\sigma}_{m}^2}) & \frac{-\overline{z}_m}{\hat{\sigma}_{m}^2} \\ \frac{-\overline{z}_m}{\hat{\sigma}_{m}^2} & \frac{1}{\hat{\sigma}_{m}^2} \end{bmatrix}   
-\end{align}
+\end{align*}
 Eventually, we conclude this demonstration by expanding $\hat{\beta}_i$ into its components and by replacing \ref{X'X rearranged} into $\hat{\beta}_i \overset{d}{\to} N(\beta_i,V(\hat{\beta_i})$:
 \begin{align}
 	\begin{bmatrix} \hat{\alpha}_i \\ \hat{\beta}_{im} \end{bmatrix}
