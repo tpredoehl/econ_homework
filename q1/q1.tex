@@ -152,7 +152,7 @@ Issues with these regressions:
 	\item The distortion for $LRM_3$ arises from the fact that neither the constant nor $x_t$ have any explanatory power for $y_t$, therefore $y_t = v_t = 0.8y_{t-1}+u_{y,t}$.\\ As $y_t$ is modelled as an AR(1), the error term of $LRM_3$ becomes:
 	\begin{align*}
 		v_t &= 0.8y_{t-1}+u_{y,t} \\
-		v_t &= 0.8(u_{y,t-1} + 0.8y_{t-2}) + +u_{y,t} \; t=1,...,T
+		v_t &= 0.8(u_{y,t-1} + 0.8y_{t-2}) +...+u_{y,t} \; t=1,...,T
 	\end{align*}
 	This intuition suggests that there is serial autocorrelation in the errors and the (asymptotic) solution to avoid too small standard errors in finite samples is to switch from the OLS VaR-Cov estimator to the Newey-West heteroskedasticity and autocorrelation consistent (HAC) one.
 \end{itemize}
