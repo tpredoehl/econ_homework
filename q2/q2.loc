@@ -1,0 +1,8 @@
+\contentsline {highlight}{Highlighted\nobreakspace {}(tp): \truncate {\Changestruncatewidth }{would you agree if we provide the sum-based solution as an alternative in an annex ?}}{1}{}%
+\contentsline {comment}{Commented\nobreakspace {}(tp): \truncate {\Changestruncatewidth }{not sure about the meaning?}}{3}{}%
+\contentsline {highlight}{Highlighted\nobreakspace {}(tp): \truncate {\Changestruncatewidth }{This model is based on excess returns, i.e. should change $r_{it}$ to $r_{it}-r_{ft}=z_{it}$}}{5}{}%
+\contentsline {highlight}{Highlighted\nobreakspace {}(tp): \truncate {\Changestruncatewidth }{simplification 1: T in the denominator should be taken out of the matrix}}{6}{}%
+\contentsline {highlight}{Highlighted\nobreakspace {}(tp): \truncate {\Changestruncatewidth }{simplification 2: $\DOTSB \sum@ \slimits@ _{t=1}^{T}z_{mt}^2-(\DOTSB \sum@ \slimits@ _{t=1}^{T}z_{mt})^2=\sigma _{m}^2$}}{6}{}%
+\contentsline {highlight}{Highlighted\nobreakspace {}(tp): \truncate {\Changestruncatewidth }{simplification 3: take out 1/T.}}{6}{}%
+\contentsline {highlight}{Highlighted\nobreakspace {}(tp): \truncate {\Changestruncatewidth }{simplification 4: cancel the Ts, leaves $T\sigma _{m}^2$ in the denominator}}{6}{}%
+\contentsline {highlight}{Highlighted\nobreakspace {}(tp): \truncate {\Changestruncatewidth }{small correction: $\sqrt {T}(\hat {\beta _i} -\beta _i) = \left (\frac {1}{T}X'X\right )^{-1}\left (\frac {1}{\sqrt {T}}X'u_i\right )$}}{7}{}%

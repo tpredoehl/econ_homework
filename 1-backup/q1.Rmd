@@ -45,8 +45,8 @@ independent_AR_simulation<- function(phi_vec, c_vec, sigma_u_vec, T){
     # reference: https://stackoverflow.com/questions/13605271/reasons-for-using-the-set-seed-function
     as.numeric(Sys.time())-> t; set.seed((t - floor(t)) * 1e8 -> seed) 
     
-    u    <- rnorm(n = T+1, mean = 0, sd = sigma_u) #WN
-    u_sim_mat[,ind1] <- u
+    u                 <- rnorm(n = T+1, mean = 0, sd = sigma_u) #WN
+    u_sim_mat[,ind1]  <- u
 
     # generate starting observation for the process: 
     # unconditional mean (stationary processes) or 0 (for non-stat processes only!, as phi=1 and c/(1-phi)=NA)
@@ -62,13 +62,13 @@ independent_AR_simulation<- function(phi_vec, c_vec, sigma_u_vec, T){
    # cut the first row from the data
    # length(AR_sim_mat); nrow(AR_sim_mat)
    # length(u_sim_mat); nrow(u_sim_mat)
-   AR_sim_mat <- AR_sim_mat[-1,]
-   u_sim_mat <- u_sim_mat[-1,]
+     AR_sim_mat <- AR_sim_mat[-1,]
+     u_sim_mat <- u_sim_mat[-1,]
    
   # Output of function
   # 1 = simulated AR process
   # 2 = simulated innovations
-  return(list(AR_sim_mat = AR_sim_mat, u_sim_mat = u_sim_mat))
+    return(list(AR_sim_mat = AR_sim_mat, u_sim_mat = u_sim_mat))
 }
 ```
 
@@ -76,9 +76,8 @@ independent_AR_simulation<- function(phi_vec, c_vec, sigma_u_vec, T){
 
 ```{r simulation, message=FALSE, warning=FALSE, include=FALSE}
 # N. of MC simulations
-# Nsim <- 20000
+# Nsim <- 10000
 Nsim <- 200
-
 
 # DGP parameters : as above #############
 phi_vec     = c(1, 1, 0.8, 0.8)
@@ -96,46 +95,45 @@ colnames(MC_mat) <- c(
   "valid_AR_intercept", "valid_AR_t_intercept", "valid_AR_beta", "valid_AR_t_beta", "valid_AR_R2"
   )
 
-tic()
-  for (t in T) {
-    #t = 6
-    t_idx <- which(t == T)
-    for(sim_idx in seq(1,Nsim)) {
-      # sim_idx = 1
-      output_temp <- independent_AR_simulation(phi_vec, c_vec, sigma_u_vec, t)
-      AR_sim <- output_temp$AR_sim_mat
-      reg_sim_RW_SPURS  <- lm(AR_sim[,2] ~ AR_sim[,1])
-      reg_sim_RW_VALID  <- lm(AR_sim[,2] ~ AR_sim[,1] + lag(AR_sim[,2]))
-      reg_sim_AR_SPURS  <- lm(AR_sim[,4] ~ AR_sim[,3])
-      reg_sim_AR_VALID  <- lm(AR_sim[,4] ~ AR_sim[,3] + lag(AR_sim[,4]))
-      mat_idx = (t_idx-1) * Nsim + sim_idx
-      MC_mat[mat_idx, 1] <- t  # T
-      MC_mat[mat_idx, 2] <- summary(reg_sim_RW_SPURS)$coefficients[1,1]  # intercept : value
-      MC_mat[mat_idx, 3] <- summary(reg_sim_RW_SPURS)$coefficients[1,3]  # intercept : t-stat
-      MC_mat[mat_idx, 4] <- summary(reg_sim_RW_SPURS)$coefficients[2,1]  # beta : value
-      MC_mat[mat_idx, 5] <- summary(reg_sim_RW_SPURS)$coefficients[2,3]  # beta : t-stat
-      MC_mat[mat_idx, 6] <- summary(reg_sim_RW_SPURS)$r.squared          # R^2
-      
-      MC_mat[mat_idx, 7] <- summary(reg_sim_RW_VALID)$coefficients[1,1]  # intercept : value
-      MC_mat[mat_idx, 8] <- summary(reg_sim_RW_VALID)$coefficients[1,3]  # intercept : t-stat
-      MC_mat[mat_idx, 9] <- summary(reg_sim_RW_VALID)$coefficients[2,1]  # beta : value
-      MC_mat[mat_idx, 10] <- summary(reg_sim_RW_VALID)$coefficients[2,3]  # beta : t-stat
-      MC_mat[mat_idx, 11] <- summary(reg_sim_RW_VALID)$r.squared          # R^2
-      
-      MC_mat[mat_idx, 12] <- summary(reg_sim_AR_SPURS)$coefficients[1,1]  # intercept : value
-      MC_mat[mat_idx, 13] <- summary(reg_sim_AR_SPURS)$coefficients[1,3]  # intercept : t-stat
-      MC_mat[mat_idx, 14] <- summary(reg_sim_AR_SPURS)$coefficients[2,1]  # beta : value
-      MC_mat[mat_idx, 15] <- summary(reg_sim_AR_SPURS)$coefficients[2,3]  # beta : t-stat
-      MC_mat[mat_idx, 16] <- summary(reg_sim_AR_SPURS)$r.squared          # R^2
-      
-      MC_mat[mat_idx, 17] <- summary(reg_sim_AR_VALID)$coefficients[1,1]  # intercept : value
-      MC_mat[mat_idx, 18] <- summary(reg_sim_AR_VALID)$coefficients[1,3]  # intercept : t-stat
-      MC_mat[mat_idx, 19] <- summary(reg_sim_AR_VALID)$coefficients[2,1]  # beta : value
-      MC_mat[mat_idx, 20] <- summary(reg_sim_AR_VALID)$coefficients[2,3]  # beta : t-stat
-      MC_mat[mat_idx, 21] <- summary(reg_sim_AR_VALID)$r.squared          # R^2
-    }  
-  }
-toc()
+for (t in T) {
+  #t = 6
+  t_idx <- which(t == T)
+  for(sim_idx in seq(1,Nsim)) {
+    # sim_idx = 1
+    output_temp <- independent_AR_simulation(phi_vec, c_vec, sigma_u_vec, t)
+    AR_sim <- output_temp$AR_sim_mat
+    reg_sim_RW_SPURS  <- lm(AR_sim[,2] ~ AR_sim[,1])
+    reg_sim_RW_VALID  <- lm(AR_sim[,2] ~ AR_sim[,1] + lag(AR_sim[,2]))
+    reg_sim_AR_SPURS  <- lm(AR_sim[,4] ~ AR_sim[,3])
+    reg_sim_AR_VALID  <- lm(AR_sim[,4] ~ AR_sim[,3] + lag(AR_sim[,4]))
+    mat_idx = (t_idx-1) * Nsim + sim_idx
+    MC_mat[mat_idx, 1] <- t  # T
+    MC_mat[mat_idx, 2] <- summary(reg_sim_RW_SPURS)$coefficients[1,1]  # intercept : value
+    MC_mat[mat_idx, 3] <- summary(reg_sim_RW_SPURS)$coefficients[1,3]  # intercept : t-stat
+    MC_mat[mat_idx, 4] <- summary(reg_sim_RW_SPURS)$coefficients[2,1]  # beta : value
+    MC_mat[mat_idx, 5] <- summary(reg_sim_RW_SPURS)$coefficients[2,3]  # beta : t-stat
+    MC_mat[mat_idx, 6] <- summary(reg_sim_RW_SPURS)$r.squared          # R^2
+    
+    MC_mat[mat_idx, 7] <- summary(reg_sim_RW_VALID)$coefficients[1,1]  # intercept : value
+    MC_mat[mat_idx, 8] <- summary(reg_sim_RW_VALID)$coefficients[1,3]  # intercept : t-stat
+    MC_mat[mat_idx, 9] <- summary(reg_sim_RW_VALID)$coefficients[2,1]  # beta : value
+    MC_mat[mat_idx, 10] <- summary(reg_sim_RW_VALID)$coefficients[2,3]  # beta : t-stat
+    MC_mat[mat_idx, 11] <- summary(reg_sim_RW_VALID)$r.squared          # R^2
+    
+    MC_mat[mat_idx, 12] <- summary(reg_sim_AR_SPURS)$coefficients[1,1]  # intercept : value
+    MC_mat[mat_idx, 13] <- summary(reg_sim_AR_SPURS)$coefficients[1,3]  # intercept : t-stat
+    MC_mat[mat_idx, 14] <- summary(reg_sim_AR_SPURS)$coefficients[2,1]  # beta : value
+    MC_mat[mat_idx, 15] <- summary(reg_sim_AR_SPURS)$coefficients[2,3]  # beta : t-stat
+    MC_mat[mat_idx, 16] <- summary(reg_sim_AR_SPURS)$r.squared          # R^2
+    
+    MC_mat[mat_idx, 17] <- summary(reg_sim_AR_VALID)$coefficients[1,1]  # intercept : value
+    MC_mat[mat_idx, 18] <- summary(reg_sim_AR_VALID)$coefficients[1,3]  # intercept : t-stat
+    MC_mat[mat_idx, 19] <- summary(reg_sim_AR_VALID)$coefficients[2,1]  # beta : value
+    MC_mat[mat_idx, 20] <- summary(reg_sim_AR_VALID)$coefficients[2,3]  # beta : t-stat
+    MC_mat[mat_idx, 21] <- summary(reg_sim_AR_VALID)$r.squared          # R^2
+  }  
+}
+
 ```
 
 \subsubsection*{1.a.i}
@@ -152,15 +150,15 @@ MC_R2 <- MC_mat %>%
   select(T, spur_RW_R2) %>% 
   mutate(T = as.factor(T))
 
-graph1 <- ggplot(MC_R2, aes(x = spur_RW_R2)) +
-  geom_histogram(color = "#787878", fill = "#0099F8", position = 'stack', binwidth = 0.05, aes(y = ..ndensity..)) + 
-  geom_density(aes(y = ..ndensity..), lwd = .2,
+graph1ai <- ggplot(MC_R2, aes(x = spur_RW_R2)) +
+  geom_histogram(color = "#787878", fill = "#0099F8", position = 'stack', binwidth = 0.05, aes(y = after_stat(ndensity))) + 
+  geom_density(aes(y = after_stat(ndensity)), lwd = .2,
                linetype = 1,
                colour = 2) +
   facet_grid( . ~ T, space = "free_x" ) +
   theme_bw() +
   ggtitle(label = TeX(r"(Distribution of $R^2$)")) + 
-  theme(text = element_text(size = 8)) +
+  theme(text = element_text()) +
   scale_y_continuous(
     breaks = c(.5, .10, .25, .5, .75, .90, .95),
     labels = scales::percent
@@ -173,8 +171,8 @@ graph1 <- ggplot(MC_R2, aes(x = spur_RW_R2)) +
   xlab(label = TeX(r"($R^2$)"))
   
 
-graph1
-
+graph1ai
+ggsave(filename = "1ai_chart.png", plot = graph1ai)
 
 # ggplot_shiny(MC_R2)
 
@@ -193,15 +191,15 @@ MC_beta_dist <- MC_mat %>%
   select(T, spur_RW_t_beta) %>% 
   mutate(T = as.factor(T))
 
-graph1 <- ggplot(MC_beta_dist, aes(x = spur_RW_t_beta)) +
-  geom_histogram(color = "#787878", fill = "#0099F8", position = 'stack', aes(y = ..ndensity..)) + 
-  geom_density(aes(y = ..ndensity..), lwd = .2,
+graph1aii <- ggplot(MC_beta_dist, aes(x = spur_RW_t_beta)) +
+  geom_histogram(color = "#787878", fill = "#0099F8", position = 'stack', aes(y = after_stat(ndensity))) + 
+  geom_density(aes(y = after_stat(ndensity)), lwd = .2,
                linetype = 1,
                colour = 2) +
   facet_grid( . ~ T, space = "free_x" ) +
   theme_bw() +
   ggtitle(label = TeX(r"(Distribution of $t_\beta$)")) + 
-  theme(text = element_text(size = 8)) +
+  theme(text = element_text()) +
   scale_y_continuous(
     breaks = c(.5, .10, .25, .5, .75, .90, .95),
     labels = scales::percent
@@ -214,8 +212,8 @@ graph1 <- ggplot(MC_beta_dist, aes(x = spur_RW_t_beta)) +
   xlab(label = TeX(r"($t_\beta$)"))
   
 
-graph1
-
+graph1aii
+ggsave(filename = "1aii_chart.png", plot = graph1aii)
 ```
 
 ```{=tex}
@@ -249,7 +247,7 @@ MC_beta_reject <- MC_mat %>%
     pct_reject_valid_AR = sum(reject_valid_AR)/Nsim,
     )
 
-graph3 <- ggplot(MC_beta_reject, aes(x = T)) +
+graph1aiii <- ggplot(MC_beta_reject, aes(x = T)) +
   geom_line(linetype = "dotted", aes(y = pct_reject_spur_RW)) +
   geom_line(linetype = "dotted", aes(y = pct_reject_valid_RW)) +
   geom_line(linetype = "solid", aes(y = pct_reject_spur_AR)) +
@@ -266,9 +264,9 @@ graph3 <- ggplot(MC_beta_reject, aes(x = T)) +
   xlab(label = "T") +
   theme_bw() +
   theme(text = element_text(size = 8))
-  
 
-graph3
+graph1aiii
+ggsave(filename = "1aii_chart.png", plot = graph1aii)
 ```
 
 \subsection*{1.b [1 Point] Based on the results obtained by answering to point (a) summarize the problems of spurious regressions in econometrics.}
