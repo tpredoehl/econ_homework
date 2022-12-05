@@ -41,18 +41,21 @@
 	
 	The original figures are:
 	
-\begin{figure}[H]
-	\
-	\begin{minipage}{0.45\textwidth}
-		\centering
-		\includegraphics[width=2\textwidth, inner]{Cochrane_15_1.png} % first figure itself
-		\caption{Figure 15.1}
-	\end{minipage}\hfill
-	\begin{minipage}{0.45\textwidth}
-		\centering
-		\includegraphics[width=2\textwidth]{Cochrane_15_2.png} % second figure itself
-		\caption{Figure 15.2}
-	\end{minipage}
+\begin{figure}[h]
+	
+	\begin{subfigure}{0.5\textwidth}
+		\includegraphics[width=0.9\linewidth, height=6cm]{overleaf-logo} 
+		\caption{Caption1}
+		\label{fig:subim1}
+	\end{subfigure}
+	\begin{subfigure}{0.5\textwidth}
+		\includegraphics[width=0.9\linewidth, height=6cm]{mesh}
+		\caption{Caption 2}
+		\label{fig:subim2}
+	\end{subfigure}
+	
+	\caption{Caption for this figure with two images}
+	\label{fig:image2}
 \end{figure}
 	
 	
