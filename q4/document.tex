@@ -63,6 +63,25 @@ Replication of 15.1 time series regression $E(R^{ei}) = \beta E(R^{em})$. Set-up
 	\item for each decile, regress $E[R^{ei}] = \beta_i E[R^{me}]$
 	\item plot $E[R^{ei}]$ on $\beta_i$
 \end{itemize}
+
+In the data, we find 12 monthly timeseries consisting of i=1,..,10 size sorted portfolios, the test assets $R^{i}$, the excess return of the market $R^{me}=R^m - R_f$ and the risk-free rate $R_f$. The factor pricing model $R_t^{ei}=\alpha_i + \beta_i f_t+e^i$ prices the excess return on the test assets on the factor f, the excess return on the market. The model expected returns $E(R^{ei})=\beta_iE(f)$ imply:
+\begin{itemize}
+	\item $E(e^i)=0$. In fact $e\sim N(0,\Omega)$.
+	\item $E(R^{ei})$ are linear in the $\beta_i$.
+	\item By $E(e^i)=0$, the model pricing errors accumulate in the regression intercepts $\alpha_i$, with expectation $E(\alpha_i)=0$.
+	\item Given that the factor is an excess return and given that the market portfolio is an investable asset it is also priced by the model. $E(R^{me}) = \beta E(R^{me})$ holds with $\beta=1$. The factor risk premium is therefore simply $\hat{\lambda}=1 E(R^{me}) = E_T(f)$.
+\end{itemize}
+
+The expected excess return-beta timeseries model is fit in graph 15.1 precisely on two points $(\beta, R^e)$:
+\begin{itemize}
+	\item The market excess return $(1, E_T(f)=E(R^{me}))$ as outlined above and
+	\item The risk-free and therefore certain risk-free rate $(0, R_f=0)$. 
+\end{itemize}
+
+The slope of the model matches the expected factor risk premium $\hat{\lambda} = \frac{E_T(f)-0}{1-0}$. The vertical distances between the model line and the test assets represent the pricing error $\alpha_i$.
+
+It is observed that the smallest size-decile exhibits the largest mean monthly excess return as well as estimated $\beta$. The positive pricing error is largest for the smallest size-decile, but smaller than in the original Cochrane figures. The reason for this is unclear, but may be related to adjustments applied on the dataset by French after 2009, or related to data adjustments that were adopted by French but not by Cochrane or vice versa.
+
 	
 	
 	
