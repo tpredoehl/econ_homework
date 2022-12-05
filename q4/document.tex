@@ -108,8 +108,9 @@ Estimates of $\hat{\lambda}$
 	
 	\item \textbf{TimeSeries Estimate $\hat{\lambda_{TS}}$} A first stage ols timeseries regression $$R_t^{ei}=\alpha_i+\beta_i f_t+e^i$$ see code line 120: ols\_model generates estimates of $\alpha_i$ and $\beta_i$ for each test asset. As outlined above, given that the factor is an excess return itself and given that the market portfolio is an investable asset it is also priced by the model. The factor risk premium is therefore simply $$\hat{\lambda_{TS}}=1 E(R^{me}) = E_T(f)$$.
 	
-	\item \textbf{OLS Cross Sectional Estimate $\hat{\lambda_{OLS}}$} The ols estimate is calculated using the well-known $\hat{\lambda_{OLS}} = (\beta'\beta)^{-1}\beta'E_T(R^{e})$ with pricing error $\hat{\alpha_{OLS}}=E_T(R^e)-\hat{\lambda_{OLS}}\beta$.
-	\item \textbf{GLS Cross Sectional Estimate $\hat{\lambda_{TS}}$}
+	\item \textbf{OLS Cross Sectional Estimate $\hat{\lambda_{OLS}}$} Using the $\beta_i$ obtained in the first stage regression, the second stage cross sectional regrssion model is formulated $$E(R^{ei})=\beta_i'\lambda + \alpha_i$$ The ols estimate is calculated using the well-known $\hat{\lambda_{OLS}} = (\beta'\beta)^{-1}\beta'E_T(R^{e})$ with pricing error $\hat{\alpha_{OLS}}=E_T(R^e)-\hat{\lambda_{OLS}}\beta$.
+	
+	\item \textbf{GLS Cross Sectional Estimate $\hat{\lambda_{TS}}$} 
 	
 \end{itemize}
 
