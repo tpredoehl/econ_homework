@@ -40,7 +40,6 @@
 	\subsection*{a. replication of Cochrane's graph 15.1 and 15.2}
 	
 \begin{figure}[h]
-	
 	\begin{subfigure}{0.5\textwidth}
 		\includegraphics[width=1\linewidth, height=6cm]{Cochrane_15_1} 
 		\caption{15.1}
@@ -50,11 +49,20 @@
 		\includegraphics[width=1\linewidth, height=6cm]{Cochrane_15_2}
 		\caption{15.2}
 		\label{fig:subim2}
-	\end{subfigure}
-	
-	\caption{the original figures from Cochrane, 2005}
+	\end{subfigure}	
+	\caption{The original figures from Cochrane, 2005}
 	\label{fig:image2}
 \end{figure}
+
+Replication of 15.1 time series regression $E(R^{ei}) = \beta E(R^{em})$. Set-up of data acquisition and regression analysis:
+
+\begin{itemize}
+	\item using the R package "frenchdata", download value weighted, size sorted portfolio returns and factors, join tables,
+	\item filter data on 1926-1998 time frame,
+	\item for each decile calculate excess return $R^{ei} = R^{i} - R_{f}$
+	\item for each decile, regress $E[R^{ei}] = \beta_i E[R^{me}]$
+	\item plot $E[R^{ei}]$ on $\beta_i$
+\end{itemize}
 	
 	
 	
