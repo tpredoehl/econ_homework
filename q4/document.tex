@@ -120,6 +120,14 @@ Estimates of $\hat{\lambda}$
 	
 	\item \textbf{Cross Sectional Estimate $\hat{\lambda}$} Using the $\beta_i$ obtained in the first stage regression leads us to the following estimators:
 	
+		\begin{tabular}{|l|l|l|l|}
+		\hline
+		Estimator & TS & OLS & GLS \\
+		\hline
+		$\hat{\lambda}$&$E_T(f)$&$(\beta'\beta)^{-1}\beta'E(R^e)$&$\left(\beta'\Sigma^{-1}\beta\right)^{-1}\beta'\Sigma^{-1}E_T(R^)e$\\
+		\hline
+	\end{tabular}
+	
 	need to distinguish between
 	\begin{itemize}
 		\item SE w/ and w/o Shanken correction\\
@@ -132,6 +140,8 @@ Estimates of $\hat{\lambda}$
 		
 	\end{itemize}
 	
+	Having obtained estimates for 
+	
 	\begin{tabular}{|l|l|l|l|}
 		\hline
 		Estimator & TS & OLS & GLS \\
@@ -139,7 +149,6 @@ Estimates of $\hat{\lambda}$
 		$\hat{\lambda}$&$E_T(f)$&$(\beta'\beta)^{-1}\beta'E(R^e)$&$\left(\beta'\Sigma^{-1}\beta\right)^{-1}\beta'\Sigma^{-1}E_T(R^)e$\\
 		$\sigma^2(\lambda)$ &  &   $\left[\frac{1}{T}(\beta'\beta)^{-1}\Sigma\beta(\beta'\beta)^{-1}+\Sigma_f\right]$  & $\frac{1}{T}\left[(\beta'\Sigma^{-1}\beta)^{-1}+\Sigma_f\right]$ \\
 		$cov(\hat{\alpha})$&&$\frac{1}{T}\left[I-\beta(\beta'\beta)\beta'\right]\Sigma\left[I-\beta(\beta'\beta)\beta'\right]'$&$\frac{1}{T}\left[\Sigma-\beta(\beta'\Sigma^{-1}\beta)^{-1}\beta'\right]$\\
-		$\chi^2$&&&\\
 		\hline
 	\end{tabular}
 	
