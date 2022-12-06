@@ -108,7 +108,7 @@ Estimates of $\hat{\lambda}$
 	
 	\item \textbf{TimeSeries Estimate $\hat{\lambda_{TS}}$} A first stage ols timeseries regression 
 	
-	\begin{align}
+	\begin{align}\label{1stage}
 		R_t^{ei}=\alpha_i+\beta_i f_t+e^i
 	\end{align}
 	
@@ -120,13 +120,15 @@ Estimates of $\hat{\lambda}$
 	
 	\item \textbf{Cross Sectional Estimate $\hat{\lambda}$} Using the $\beta_i$ obtained in the first stage regression leads us to the following estimators:
 	
-		\begin{tabular}{|l|l|l|l|}
+	\begin{tabular}{|l|l|l|l|}
 		\hline
 		Estimator & TS & OLS & GLS \\
 		\hline
 		$\hat{\lambda}$&$E_T(f)$&$(\beta'\beta)^{-1}\beta'E(R^e)$&$\left(\beta'\Sigma^{-1}\beta\right)^{-1}\beta'\Sigma^{-1}E_T(R^)e$\\
 		\hline
 	\end{tabular}
+	
+	Using $\Sigma = $
 	
 	need to distinguish between
 	\begin{itemize}
