@@ -118,17 +118,18 @@ Estimates of $\hat{\lambda}$
 		E(R^{ei})=\beta_i'\lambda + \alpha_i
 	\end{align}
 	
-	\item \textbf{Cross Sectional Estimate $\hat{\lambda}$} Using the $\beta_i$ obtained in the first stage regression leads us to the following estimators:
+	\item \textbf{Cross Sectional Estimate $\hat{\lambda}$} Using the $\beta_i$ 	and the regression residuals $e^i$ obtained from (\ref{1stage}), the estimators for $\hat{\lambda}$ are derived. 
 	
 	\begin{tabular}{|l|l|l|l|}
 		\hline
 		Estimator & TS & OLS & GLS \\
 		\hline
 		$\hat{\lambda}$&$E_T(f)$&$(\beta'\beta)^{-1}\beta'E(R^e)$&$\left(\beta'\Sigma^{-1}\beta\right)^{-1}\beta'\Sigma^{-1}E_T(R^)e$\\
+		$\sigma^2(\lambda)$ &  &   $\left[\frac{1}{T}(\beta'\beta)^{-1}\Sigma\beta(\beta'\beta)^{-1}+\Sigma_f\right]$  & $\frac{1}{T}\left[(\beta'\Sigma^{-1}\beta)^{-1}+\Sigma_f\right]$ \\
 		\hline
 	\end{tabular}
 	
-	The regression residuals $e^i$ obtained from (\ref{1stage}) form the  residual covariance matrix $\Sigma = E(ee') = \frac{e'e}{T}$
+	The 
 	
 	need to distinguish between
 	\begin{itemize}
