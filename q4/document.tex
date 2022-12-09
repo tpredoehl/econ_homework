@@ -41,12 +41,12 @@
 	
 \begin{figure}[h]
 	\begin{subfigure}{0.5\textwidth}
-		\includegraphics[width=1\linewidth, height=6cm]{Cochrane_15_1} 
+		%\includegraphics[width=1\linewidth, height=6cm]{Cochrane_15_1} 
 		\caption{15.1}
 		\label{fig:subim1}
 	\end{subfigure}
 	\begin{subfigure}{0.5\textwidth}
-		\includegraphics[width=1\linewidth, height=6cm]{Cochrane_15_2}
+		%\includegraphics[width=1\linewidth, height=6cm]{Cochrane_15_2}
 		\caption{15.2}
 		\label{fig:subim2}
 	\end{subfigure}	
@@ -84,12 +84,12 @@ It is observed that the smallest size-decile exhibits the largest mean monthly e
 
 \begin{figure}[H]
 	\begin{subfigure}{0.5\textwidth}
-		\includegraphics[width=1\linewidth, height=6cm]{replicated_15_1} 
+		%\includegraphics[width=1\linewidth, height=6cm]{replicated_15_1} 
 		\caption{15.1}
 		\label{fig:subim3}
 	\end{subfigure}
 	\begin{subfigure}{0.5\textwidth}
-		\includegraphics[width=1\linewidth, height=6cm]{replicated_15_2}
+		%\includegraphics[width=1\linewidth, height=6cm]{replicated_15_2}
 		\caption{15.2}
 		\label{fig:subim4}
 	\end{subfigure}	
@@ -170,6 +170,25 @@ Estimates of $\hat{\lambda}$
 		$\hat{\lambda}$&$E_T(f)$&$(\beta'\beta)^{-1}\beta'E(R^e)$&$\left(\beta'\Sigma^{-1}\beta\right)^{-1}\beta'\Sigma^{-1}E_T(R^)e$\\
 		$\sigma^2(\lambda)$ &  &   $\left[\frac{1}{T}(\beta'\beta)^{-1}\Sigma\beta(\beta'\beta)^{-1}+\Sigma_f\right]$  & $\frac{1}{T}\left[(\beta'\Sigma^{-1}\beta)^{-1}+\Sigma_f\right]$ \\
 		$cov(\hat{\alpha})$&&$\frac{1}{T}\left[I-\beta(\beta'\beta)\beta'\right]\Sigma\left[I-\beta(\beta'\beta)\beta'\right]'$&$\frac{1}{T}\left[\Sigma-\beta(\beta'\Sigma^{-1}\beta)^{-1}\beta'\right]$\\
+		\hline
+	\end{tabular}
+
+
+	Replication of table 15.1
+	
+	\begin{tabular}{l|r|r|r|r|r|r} 
+		\hline
+		Item & TS\_EstSE & TS\_t & OLS\_EstSE & OLS\_t & GLS\_EstSE & GLS\_t\\
+		\hline
+		Estimate & 0.7076 &  & 0.7433 &  & 0.7076 & \\
+		\hline
+		iid & 0.1950 & 3.63 & 0.1913 & 3.89 & 0.1950 & 3.63\\
+		\hline
+		0-lag & 0.1902 & 3.72 & 0.1919 & 3.87 & 0.1902 & 3.72\\
+		\hline
+		3 lags, NW & 0.1891 & 3.74 & 0.1891 & 3.93 & 0.1891 & 3.74\\
+		\hline
+		24 lags & 0.1891 & 3.74 & 0.1891 & 3.93 & 0.1891 & 3.74\\
 		\hline
 	\end{tabular}
 	
