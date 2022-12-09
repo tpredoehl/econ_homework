@@ -5,6 +5,7 @@
 #######################################################################
   library(tidyverse)
   require(sandwich)
+  library(magick)
   library(GRS.test)
   library(lubridate)
   library(kableExtra)
@@ -200,8 +201,8 @@
   # par(mar = c(4, 4, .1, .1))
   # plot_15_1
   # plot_15_2
-  ggsave(filename = "replicated_15_1.png", plot = plot_15_1)
-  ggsave(filename = "replicated_15_2.png", plot = plot_15_2)
+  ggsave(filename = "q4/replicated_15_1.png", plot = plot_15_1)
+  ggsave(filename = "q4/replicated_15_2.png", plot = plot_15_2)
 #######################################################################
 ###
 ### 4b. a replicate figures 15.1. 15.2
@@ -262,9 +263,11 @@
     tbl_gls <- t(bind_rows(Estimate=c(lambda_hat_gls, NA), iid=GLS_iid, lag0=GLS_0lag, NW3=GLS_3NW, lag24=GLS_24lag))
     tbl_15_1 <- bind_cols(title, tbl_ts, tbl_ols, tbl_gls)
     colnames(tbl_15_1) <- c("Item", "TS_EstSE", "TS_t", "OLS_EstSE", "OLS_t", "GLS_EstSE", "GLS_t")
-    
+
     opts <- options(knitr.kable.NA = "")
-    kable(x = tbl_15_1, digits = c(0, 4, 2, 4, 2, 4, 2), align = "lrrrrrr", "simple")
+    tbl_15_1_latex <- kable(x = tbl_15_1, digits = c(0, 4, 2, 4, 2, 4, 2), align = "lrrrrrr", format = "latex")
+    #save_kable(x = tbl_15_1_latex, file = "q4/table_15_1") # produces magick errors???
+    
   #######################################################################
   ###
   ### GRS Tests pricing error -> Table 15.2
@@ -365,6 +368,48 @@
   tbl_15_2[5,]        <- lag24_row     
   
   opts <- options(knitr.kable.NA = "")
-  kable(x = tbl_15_2, digits = c(4,4,4,4,4,4,4,4), align = "lrrrrrrr", "simple")
+  tbl_15_2_latex <- kable(x = tbl_15_2, digits = c(4,4,4,4,4,4,4,4), align = "lrrrrrrr", "latex")
+  
+#######################################################################
+###
+### 4c. bootstrap
+###
+#######################################################################
+  # step 1
+    # the model: r_it = alpha_i + beta_i f_t + u_it
+    # H0: alpha_i = 0
+    # estimate all parameters by OLS (alpha, beta, omega)
+    # calculate the original sample of residuals
+    alpha           <- E_ri - mean(f_t)*beta
+    u               <- r_it - f_t%*%beta
+    omega           <- cov(u)
+  # step 2
+    # compute the test statistic
+      tau <- (t(alpha)%*%solve(omega)%*%alpha)
+  # step 3
+      B <- 999
+      tau_b <- rep(0,B)
+      for (b in 1:B) {
+        # 1 resample with replacement u_b of size T
+          u_b <- matrix(data = 0, nrow = nrow(u), ncol = ncol(u))
+          for (i in 1:ncol(u)) u_b[,i] <- sample(x = u[,i], size = T, replace = TRUE)
+        # 2 generate new sample of r_it using original alpha, beta and u_b from step 2
+          r_it_b <- alpha + f_t%*%beta + u_b
+        # 3 re-estimate all parameters by OLS (alpha_b, beta_b, omega_b)
+          ols_model_b <- lm(r_it_b~f_t); ols_model_b_summary <- summary(ols_model_b)
+          beta_b      <- ols_model_b$coefficients[2,]
+          alpha_b     <- ols_model_b$coefficients[1,]
+          omega_b     <- cov(ols_model_b$residuals)
+        # 4 re-compute the test statistic using alpha_b and omega_b
+          tau_b[b]    <- (t(alpha_b)%*%solve(omega_b)%*%alpha_b)
+      }
+  # step 4
+    # compute the bootstrapped p-values: p(tau_b) = 1/B sum(|tau_b|>=tau)
+      p           <- (1/B) * sum(abs(tau_b)>rep(tau, B))
+  # step 5
+    # interpret p(t)
+      # p(tau_b)>0.05, fail to reject H0
+      # p(tau_b)<=0.05, reject H0
+    
   
   
