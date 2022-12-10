@@ -19,11 +19,68 @@
 ### Helper Functions
 ###
 #######################################################################
+  get15_2 <- function(ols_model, type, uDist, finiteSample) {
+  # ChiSq is the asymptotic test. 
+  # The finite sample F-test requires multiplier (T-N-(K-1))/N instead of T
+  # finiteSample = FALSE
+  # type = "GLS"
+  # uDist = "3NW"
+  # Dimensions
+  N                         <- ncol(ols_model$fitted.values)    # small relative to T -> OK
+  T                         <- nrow(ols_model$residuals)        # large relative to N -> OK
+  K                         <- ols_model$rank
+  beta_vec                  <- t(ols_model$coefficients)
+  alpha                     <- ols_model$coefficients["(Intercept)",]
+  beta                      <- ols_model$coefficients["f_t",]
+  omega                     <- cov(ols_model$residuals)
+  # params
+  f_t                       <- ols_model$model$f_t
+  f_t_hat                   <- mean(f_t)
+  V_f                       <- as.numeric(var(f_t))
+  r_it                      <- ols_model$model$r_it
+  # lambda
+  if(type == "TS") lambda   <- mean(f_t)
+  if(type == "OLS")lambda   <- solve(t(beta)%*%beta)%*%t(beta)%*%E_ri
+  if(type == "GLS")lambda   <- (solve(t(beta_vec)%*%solve(omega)%*%beta_vec)%*%t(beta_vec)%*%solve(omega)%*%E_ri)["f_t",1]
+  # omega
+  if(uDist == "iid")   omega <- omega # mean(diag(omega))*diag(1,nrow = N) gives too low 
+  if(uDist == "0lag")  omega <- omega # diag(diag(omega),nrow = N)
+  if(uDist == "3NW") {
+    omega                   <- NeweyWest(ols_model, lag = 3, prewhite = FALSE, sandwich = FALSE, adjust = TRUE)
+    f_Cols                  <- grep(pattern = ":f_t", x = colnames(omega))
+    omega                   <- omega[f_Cols,f_Cols]*as.numeric(solve(t(f_t)%*%f_t))
+  }  
+  if(uDist == "24lag") {
+    omega                   <- NeweyWest(ols_model, lag = 24, prewhite = FALSE, sandwich = TRUE, adjust = TRUE)
+    f_Cols                  <- grep(pattern = ":f_t", x = colnames(omega))
+    omega                   <- omega[f_Cols,f_Cols]
+  }
+  
+  # testing
+  theta2_p    <- t(f_t_hat)%*%solve(V_f)%*%f_t_hat
+  SHK         <- as.numeric((1+t(lambda%*%solve(V_f)%*%lambda)))
+  aOa         <- (t(alpha)%*%solve(omega)%*%alpha)
+  if (type == "TS" & finiteSample == TRUE) {
+    eta       <- (T-N-(K-1))/N * (1+theta2_p)^-1 * aOa      # TS/SUR (finite sample) Ch3, p.29 (GRS Stat)
+    eta_p     <- pf(q = eta, df1 = N, df2 = T-N-(K-1)) 
+  }
+  if (finiteSample == FALSE) {
+    eta       <- T * (1+theta2_p)^-1 * aOa                  # TS/SUR (asymptotic) Ch3, p.31, (1.29)
+    if(type == "GLS" | type == "OLS") N <- N-1              # comment Cochrane, p. 286: "the market premium is estimated from the cross section rather than from the market return"
+    eta_p     <- pchisq(q = eta, df = N)
+  }
+  eta_SHK     <- SHK*eta
+  eta_p_SHK   <- pchisq(q = eta_SHK, df = N-1)
+  result      <- c(eta, eta_p, eta_SHK, eta_p_SHK)
+  
+  return(result)
+}
   getNW <- function(L, X, e){
-    X <- f_t
+    X <- cbind(f_t)
     e <- u
     K = ncol(e)
     N = nrow(X)
+    L = 3
     XSX <- matrix(data = 0, nrow = K, ncol = K)
     for (i in 0:L){
       wl <- 1-(i/(L+1))
@@ -31,10 +88,7 @@
       Xj <- X[(1+i):N,]
       ei <- e[1:(N-i),]
       ej <- e[(1+i):N,]
-      
-      Wi <- as.numeric(t(Xi)%*%Xj) * t(ei)%*%ej
-      
-      # Wi <- t(Xi)%*%(Xj*ei*ej) + t(Xj)%*%(Xi*ej*ei)
+      Wi <- (1/N)*(as.numeric(t(Xi)%*%(Xj))*t(ei)%*%(ej) + as.numeric(t(Xj)%*%(Xi))*t(ej)%*%(ei))
       W_temp <- wl*Wi
       XSX <- XSX+W_temp
     }
@@ -42,12 +96,14 @@
     XX <- as.numeric(solve(t(X)%*%X))
     Vb_HAC <- XX*XSX*XX
     Vb_HAC[1,1]
-    Vb_NW <- NeweyWest(ols_model, lag = 3, prewhite = FALSE, sandwich = TRUE, adjust = TRUE)
+    Vb_NW <- NeweyWest(ols_model, lag = 3, prewhite = FALSE, sandwich = TRUE, adjust = FALSE)
     f_Cols <- grep(pattern = ":f_t", x = colnames(Vb_NW))
     Vb_NW <- Vb_NW[f_Cols,f_Cols]
     Vb_NW[1,1]
-    # NO MATCH !
-    Vb_HAC[1,1]-Vb_NW[1,1]
+    
+    Vb_NW[1,1]/Vb_HAC[1,1]
+    
+    # NO MATCH ! NO idea  ....
   }
   getTBL <- function(lambda, beta, type){
     iid   <- getSE(lambda, beta, omega_iid, V_f, type)
@@ -61,11 +117,6 @@
     return(tbl_lambda)
   }
   getSE <- function(lambda, beta_vec, omega, V_f, type){
-    if (type == "NW") {
-      omega <- omega_3NW
-      V_ <- (1/T)*(V_f + BBB%*%omega%*%BBBt)
-      SE_ <- sqrt(V_)
-    }
     if(type == "ts" || type == "gls"){
       # omega <- omega_24lag
       V_ <- (1/T) * (solve(t(beta_vec) %*% solve(omega) %*% beta_vec) + V_f)
@@ -155,6 +206,7 @@
 # var-cov matrix of (zero mean) residuals
   u <- ols_model$residuals
   omega <- (t(u)%*%u)/(T-K)
+
 #######################################################################
 ###
 ### 4b. a replicate figures 15.1. 15.2
@@ -214,161 +266,89 @@
   ###
   #######################################################################
   # estimate lambda
-    lambda_hat_ols <- solve(t(beta)%*%beta)%*%t(beta) %*% E_ri  # (1.43) lecture notes 3, p. 59
-    TS_model <- summary(lm((E_ri)~beta_vec-1))
-    lambda_hat_ts <- TS_model$coefficients[2,"Estimate"]
-    lambda_hat_gls <- (solve(t(beta_vec)%*%solve(omega)%*%beta_vec)%*%t(beta_vec)%*%solve(omega)%*%E_ri)[2,1]
+    lambda_hat_ols  <- solve(t(beta)%*%beta)%*%t(beta) %*% E_ri  # (1.43) lecture notes 3, p. 59
+    TS_model        <- summary(lm((E_ri)~beta_vec-1))
+    lambda_hat_ts   <- TS_model$coefficients[2,"Estimate"]
+    lambda_hat_gls  <- (solve(t(beta_vec)%*%solve(omega)%*%beta_vec)%*%t(beta_vec)%*%solve(omega)%*%E_ri)[2,1]
   #######################################################################
   ###
   ### Estimates of SE of lambda -> Table 15.1
   ###
   #######################################################################
   # iid 
-    omega_iid <- mean(diag(omega))*diag(1,nrow = N)
+    omega_iid   <- mean(diag(omega))*diag(1,nrow = N)
   # 0-lag
-    omega_0lag <- diag(diag(omega),nrow = N)
+    omega_0lag  <- diag(diag(omega),nrow = N)
   # 3NW-lag
   # sandwhich package outputs the whole sandwhich 
   # since we need to plug it into the V(b) = (1/T)(Vf + bbb'Obbb), the reults will look like
   # Var(b) = (1/T)(Vf + bbb' [(1/n X'X)^-1] [1/n phi] [(1/n X'X)^-1] bbb)
-    omega_3NW <- NeweyWest(ols_model, lag = 3, prewhite = FALSE, sandwich = TRUE, adjust = TRUE)
-    f_Cols <- grep(pattern = ":f_t", x = colnames(omega_3NW))
-    omega_3NW <- omega_3NW[f_Cols,f_Cols]
+    omega_3NW   <- NeweyWest(ols_model, lag = 3, prewhite = FALSE, sandwich = TRUE, adjust = TRUE)
+    f_Cols      <- grep(pattern = ":f_t", x = colnames(omega_3NW))
+    omega_3NW   <- omega_3NW[f_Cols,f_Cols]
   # 24NW-lag
     omega_24lag <- NeweyWest(ols_model, lag = 24, prewhite = FALSE, sandwich = TRUE, adjust = TRUE)
-    f_Cols <- grep(pattern = ":f_t", x = colnames(omega_24lag))
+    f_Cols      <- grep(pattern = ":f_t", x = colnames(omega_24lag))
     omega_24lag <- omega_24lag[f_Cols,f_Cols]
   # TS
   #getTBL(lambda_hat_ts, beta_vec, "ts")
-    TS_iid <- getSE(lambda_hat_ts, beta_vec, omega_iid, V_f, "ts")
-    TS_0lag <- getSE(lambda_hat_ts, beta_vec, omega_0lag, V_f, "ts")
-    TS_3NW <- getSE(lambda_hat_ts, beta_vec, omega_3NW, V_f, "ts")
-    TS_24lag <- getSE(lambda_hat_ts, beta_vec, omega_24lag, V_f, "ts")
+    TS_iid      <- getSE(lambda_hat_ts, beta_vec, omega_iid, V_f, "ts")
+    TS_0lag     <- getSE(lambda_hat_ts, beta_vec, omega_0lag, V_f, "ts")
+    TS_3NW      <- getSE(lambda_hat_ts, beta_vec, omega_3NW, V_f, "ts")
+    TS_24lag    <- getSE(lambda_hat_ts, beta_vec, omega_24lag, V_f, "ts")
   # OLS
   #getTBL(lambda_hat_ols, beta, "ols")
-    OLS_iid <- getSE(lambda_hat_ols, beta, omega_iid, V_f, "ols")
-    OLS_0lag <- getSE(lambda_hat_ols, beta, omega_0lag, V_f, "ols")
-    OLS_3NW <- getSE(lambda_hat_ols, beta, omega_3NW, V_f, "ols")
-    OLS_24lag <- getSE(lambda_hat_ols, beta, omega_24lag, V_f, "ols")
+    OLS_iid     <- getSE(lambda_hat_ols, beta, omega_iid, V_f, "ols")
+    OLS_0lag    <- getSE(lambda_hat_ols, beta, omega_0lag, V_f, "ols")
+    OLS_3NW     <- getSE(lambda_hat_ols, beta, omega_3NW, V_f, "ols")
+    OLS_24lag   <- getSE(lambda_hat_ols, beta, omega_24lag, V_f, "ols")
   # GLS
   #getTBL(lambda_hat_gls, beta_vec, "gls")
-    GLS_iid <- getSE(lambda_hat_gls, beta_vec, omega_iid, V_f, "gls")
-    GLS_0lag <- getSE(lambda_hat_gls, beta_vec, omega_0lag, V_f, "gls")
-    GLS_3NW <- getSE(lambda_hat_gls, beta_vec, omega_3NW, V_f, "gls")
-    GLS_24lag <- getSE(lambda_hat_gls, beta_vec, omega_24lag, V_f, "gls")
+    GLS_iid     <- getSE(lambda_hat_gls, beta_vec, omega_iid, V_f, "gls")
+    GLS_0lag    <- getSE(lambda_hat_gls, beta_vec, omega_0lag, V_f, "gls")
+    GLS_3NW     <- getSE(lambda_hat_gls, beta_vec, omega_3NW, V_f, "gls")
+    GLS_24lag   <- getSE(lambda_hat_gls, beta_vec, omega_24lag, V_f, "gls")
   # compile table
-    title <- c("Estimate", "iid", "0-lag", "3 lags, NW", "24 lags")
-    tbl_ts <- t(bind_rows(Estimate=c(lambda_hat_ts, NA), iid=TS_iid, lag0=TS_0lag, NW3=TS_3NW, lag24=TS_24lag))
-    tbl_ols <- t(bind_rows(Estimate=c(lambda_hat_ols, NA), iid=OLS_iid, lag0=OLS_0lag, NW3=OLS_3NW, lag24=OLS_24lag))
-    tbl_gls <- t(bind_rows(Estimate=c(lambda_hat_gls, NA), iid=GLS_iid, lag0=GLS_0lag, NW3=GLS_3NW, lag24=GLS_24lag))
-    tbl_15_1 <- bind_cols(title, tbl_ts, tbl_ols, tbl_gls)
+    title       <- c("Estimate", "iid", "0-lag", "3 lags, NW", "24 lags")
+    tbl_ts      <- t(bind_rows(Estimate=c(lambda_hat_ts, NA), iid=TS_iid, lag0=TS_0lag, NW3=TS_3NW, lag24=TS_24lag))
+    tbl_ols     <- t(bind_rows(Estimate=c(lambda_hat_ols, NA), iid=OLS_iid, lag0=OLS_0lag, NW3=OLS_3NW, lag24=OLS_24lag))
+    tbl_gls     <- t(bind_rows(Estimate=c(lambda_hat_gls, NA), iid=GLS_iid, lag0=GLS_0lag, NW3=GLS_3NW, lag24=GLS_24lag))
+    tbl_15_1    <- bind_cols(title, tbl_ts, tbl_ols, tbl_gls)
     colnames(tbl_15_1) <- c("Item", "TS_EstSE", "TS_t", "OLS_EstSE", "OLS_t", "GLS_EstSE", "GLS_t")
 
-    opts <- options(knitr.kable.NA = "")
-    tbl_15_1_latex <- kable(x = tbl_15_1, digits = c(0, 4, 2, 4, 2, 4, 2), align = "lrrrrrr", format = "latex")
-    #save_kable(x = tbl_15_1_latex, file = "q4/table_15_1") # produces magick errors???
-    
+    tbl_15_1 <- kable(x = tbl_15_1, digits = c(0, 4, 2, 4, 2, 4, 2), align = "lrrrrrr", format = "latex")
+    xtbl_15_1 <- xtable(tbl_15_1, align = "lrrrrrrr", digits = c(0, 0, 4, 2, 4, 2, 4, 2))
+    print(xtbl_15_1, file = "tbl_15_1.tex")
   #######################################################################
   ###
-  ### GRS Tests pricing error -> Table 15.2
-  ### alpha takes the form of E_ri - beta lambda
+  ### Table 15.2
+  ### 0lag, 3NW, 24lag produce only crap ...
   ###
   #######################################################################
-  # critical value of F test
-  c(qf(0.90, N, T-N-K), qf(0.95, N, T-N-K), qf(0.99, N, T-N-K))
-  # GRS
-  grs.stats <- GRS.test(ret.mat = r_it, factor.mat = f_t)
-  grs_f <- grs.stats$GRS.stat; grs_f
-  grs_pval <- grs.stats$GRS.pval; grs_pval
-  # general test setup: (a-0)'V(a)^-1(a-0)'
-  theta2_p    <- t(f_t_hat)%*%solve(V_f)%*%f_t_hat        # max Sharpe^2
-  theta2_p2   <- f_t_hat^2/V_f
-  var_a <- (1/T) * (1 + f_t_hat^2/V_f) * omega
-  alpha%*%solve(var_a)%*%alpha
-  # test statistics
-  aOa <- (t(alpha)%*%solve(omega)%*%alpha)
-  aOa_iid <- (t(alpha)%*%solve(omega_iid)%*%alpha)
-  # Cochrane (12.3), p. 231     # =Cochrane (12.8), p.234
-  T * (1+theta2_p)^-1 * aOa # =alpha%*%solve(var_a)%*%alpha
-  T * (1+theta2_p)^-1 * aOa_iid
-  # finite sample F-Test  for H0: a1=a2=...=aN = 0, Cochrane (12.4), p. 231
-  # e are normal, uncorrelated and homoskedastic
-  Xi_2 <- ((T-N-(K-1))/N)*aOa/(1+theta2_p); Xi_2
-  Xi_p <- pf(Xi_2, N, T-N-(K-1)); Xi_p                  # pval .41 < .59?
-  # finite sample F-test for H0: a1=a2=...=aN = 0
-  theta2_p    <- t(f_t_hat)%*%solve(V_f)%*%f_t_hat
-  aOa <- (t(alpha)%*%solve(omega)%*%alpha)
-  eta2 <- (T-N-(K-1))/N * (1+theta2_p)^-1 * aOa; eta2
-  eta2_p <- pf(eta2, N, T-N-(K-1)); eta2_p                # pval .41 < .59?
-  
-  # OLS Cochrane, p.237
-  lambda_hat_ols <- solve(t(beta)%*%beta)%*%t(beta)%*%E_ri
-  alpha_ols <- t(E_ri - lambda_hat_ols%*%beta)
-  var_lambda_hat_ols <- (1/T)*(solve(t(beta)%*%beta)%*%(beta)%*%omega%*%beta%*%solve(t(beta)%*%beta)+V_f)
-  SE_lambda_ols <- sqrt(var_lambda_hat_ols)
-  var_a2 <- (1/T)*(V_f*beta%*%t(beta) + omega)
-  Mb <- (diag(N)-beta%*%solve(t(beta)%*%beta)%*%t(beta))
-  var_a_ols <- Mb%*%omega%*%t(Mb)
-  T*t(alpha_ols)%*%solve(var_a2)%*%alpha_ols
-  # t(alpha_ols)%*%solve(var_a_ols)%*%alpha_ols             # MbOMb not inversible ...?
-  # Shanken correction, p. 240
-  SHK <- as.numeric((1+t(lambda_hat_ols%*%solve(V_f)%*%lambda_hat_ols)))
-  # t(alpha_ols)%*%solve(var_a_ols*SHK)%*%alpha_ols       # MbOMb not inversible ...?
-  # t(alpha_ols)%*%solve(var_a2*SHK)%*%alpha_ols
-  
-  # GLS Cochrane, p. 238
-  lambda_hat_gls <- (solve(t(beta_vec)%*%solve(omega)%*%beta_vec)%*%t(beta_vec)%*%solve(omega)%*%E_ri)[2,1]
-  alpha_gls <- E_ri - beta*lambda_hat_gls
-  var_lambda_hat_gls <- (1/T)*(solve(t(beta)%*%solve(omega)%*%beta)+V_f)
-  SE_lambda_gls <- sqrt(var_lambda_hat_gls)
-  var_a_gls <- (1/T)*(omega - beta%*%solve(t(beta)%*%solve(omega)%*%beta)%*%t(beta)) # (12.17), p. 238, = V(e) in (1.46) course notes, Ch 3, p. 64
-  # T*t(alpha_gls)%*%solve(var_a_gls)%*%alpha_gls           # not invertible ...?
-  T*t(alpha_gls)%*%solve(omega)%*%alpha_gls               # (1.52) Ch3, p. 68
-  # Shanken correction, p. 240
-  SHK <- as.numeric((1+t(lambda_hat_gls%*%solve(V_f)%*%lambda_hat_gls)))
-  T*SHK*t(alpha_gls)%*%solve(omega)%*%alpha_gls           # (12.22), p. 240   
-  
   # Table 15.2
   row_title <- c("iid", "GRS F", "0lag", "3lag-NW", "24lag")
   column_title <- c("TS_Chi2", "TS_pval", "TS_Chi2_SHK", "TS_pval_SHK", "CS_Chi2", "CS_pval", "CS_Chi2_SHK", "CS_pval_SHK")
-  theta2_p  <- t(f_t_hat)%*%solve(V_f)%*%f_t_hat
-  # TS - OK
-  alpha           <- E_ri - mean(f_t)*beta
-  u               <- r_it - f_t%*%beta
-  omega           <- cov(u)
-  aOa_iid         <- (t(alpha)%*%solve(omega)%*%alpha)
-  eta_iid         <- T * (1+theta2_p)^-1 * aOa_iid; eta_iid
-  eta_iid_p       <- pchisq(q = eta_iid, df = N); eta_iid_p
-  eta_iid_SHK     <- SHK*eta_iid; eta_iid_SHK
-  eta_iid_p_SHK   <- pchisq(q = eta_iid_SHK, df = N-1); eta_iid_p_SHK
-  # CS - GLS
-  lambda_hat_gls  <- (solve(t(beta_vec)%*%solve(omega)%*%beta_vec)%*%t(beta_vec)%*%solve(omega)%*%E_ri)[2,1]
-  alpha_gls       <- E_ri - beta*lambda_hat_gls
-  var_a_gls       <- (1/T)*(omega - beta%*%solve(t(beta)%*%solve(omega)%*%beta)%*%t(beta))
-  aOa_CS_iid      <- T*(t(alpha_gls)%*%solve(omega)%*%alpha_gls); aOa_CS_iid
-  eta_CS_iid_p    <- pchisq(q = aOa_CS_iid, df = N); eta_CS_iid_p
-  eta_CS_iid_SHK  <- SHK*aOa_CS_iid; eta_CS_iid_SHK
-  eta_CS_iid_p_SHK<- pchisq(q = eta_CS_iid_SHK, df = N-1); eta_CS_iid_p_SHK
-  row_iid         <- c(eta_iid, eta_iid_p, eta_iid_SHK, eta_iid_p_SHK, aOa_CS_iid, eta_CS_iid_p, eta_CS_iid_SHK, eta_CS_iid_p_SHK)
-  # put the table together...  
-  tbl_15_2            <- rbind(row_iid, row_iid, row_iid, row_iid, row_iid)
+
+  grs.stats <- GRS.test(ret.mat = r_it, factor.mat = f_t)
+  grs_f     <- grs.stats$GRS.stat
+  grs_pval  <- grs.stats$GRS.pval
+  
+  row_iid         <- c(get15_2(ols_model, type = "TS", uDist = "iid", finiteSample = FALSE), get15_2(ols_model, type = "GLS", uDist = "iid", finiteSample = FALSE))
+  row_grs         <- c(grs_f, grs_pval, NA, NA, NA, NA, NA, NA)
+  row_0lag        <- c(get15_2(ols_model, type = "TS", uDist = "0lag", finiteSample = FALSE), get15_2(ols_model, type = "GLS", uDist = "0lag", finiteSample = FALSE))
+  row_3NW         <- c(get15_2(ols_model, type = "TS", uDist = "3NW", finiteSample = FALSE), get15_2(ols_model, type = "GLS", uDist = "3NW", finiteSample = FALSE))
+  row_24lag       <- c(get15_2(ols_model, type = "TS", uDist = "24lag", finiteSample = FALSE), get15_2(ols_model, type = "GLS", uDist = "24lag", finiteSample = FALSE))
+  
+  tbl_15_2            <- rbind(row_iid, row_grs, row_0lag, row_3NW, row_24lag)
   colnames(tbl_15_2)  <- column_title
   rownames(tbl_15_2)  <- row_title
-  # GRS F row
-  grs_row             <- c(grs_f, grs_pval, NA, NA, NA, NA, NA, NA)
-  tbl_15_2[2,]        <- grs_row      
-  # 0Lag row
-  lag0_row            <- c(NA, NA, NA, NA, NA, NA, NA, NA)
-  tbl_15_2[3,]        <- lag0_row     
-  # 3NW row
-  NW3_row             <- c(NA, NA, NA, NA, NA, NA, NA, NA)
-  tbl_15_2[4,]        <- NW3_row     
-  # lag24 row
-  lag24_row           <- c(NA, NA, NA, NA, NA, NA, NA, NA)
-  tbl_15_2[5,]        <- lag24_row     
+  tbl_15_2_ts         <- tbl_15_2[1:2,1:4]
+  tbl_15_2_cs         <- tbl_15_2[1:2,5:8]
   
-  opts <- options(knitr.kable.NA = "")
-  tbl_15_2_latex <- kable(x = tbl_15_2, digits = c(4,4,4,4,4,4,4,4), align = "lrrrrrrr", "latex")
+  xtbl_15_2_ts        <- xtable(tbl_15_2_ts, digits = c(0,2,2,2,2), align = "llrrr")
+  xtbl_15_2_cs        <- xtable(tbl_15_2_cs, digits = c(0,2,2,2,2), align = "llrrr")
+  print(xtbl_15_2_ts, file = "tbl_15_2_ts.tex")
+  print(xtbl_15_2_cs, file = "tbl_15_2_cs.tex")
   
 #######################################################################
 ###
